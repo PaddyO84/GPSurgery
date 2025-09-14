@@ -1,3 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prescription Request Form - Carndonagh Health Centre Style</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #003366;
+            --primary-green: #28a745;
+            --danger-red: #dc3545;
+            --light-grey: #f8f9fa;
+            --border-grey: #dee2e6;
+            --text-dark: #343a40;
+            --header-height: 70px;
+        }
+        body {
+            font-family: 'Lato', sans-serif;
+            margin: 0;
+            background-color: var(--light-grey);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+        .site-header {
+            background-color: #ffffff;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border-grey);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-sizing: border-box;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .site-header h1 { color: var(--primary-blue); font-size: 1.75rem; margin: 0; }
+        .mobile-menu-icon {
+            display: none;
+            font-size: 2rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--primary-blue);
+        }
+        .main-wrapper {
+            display: flex;
+            max-width: 1200px;
+            margin: 20px auto;
+            align-items: flex-start;
+        }
+        .sidebar {
+            width: 200px;
+            padding: 2.5rem 1rem;
+            flex-shrink: 0;
+            position: sticky;
+            top: var(--header-height);
+            height: calc(100vh - var(--header-height));
+            overflow-y: auto;
+        }
+        .sidebar h3 { color: var(--primary-blue); border-bottom: 1px solid var(--border-grey); padding-bottom: 10px; margin-top: 0; margin-bottom: 1.5rem; font-size: 1.2rem; }
+        .sidebar button { background-color: var(--light-grey); color: var(--primary-blue); padding: 10px 15px; margin-bottom: 10px; border: 1px solid var(--border-grey); border-radius: 4px; cursor: pointer; font-size: 0.95rem; width: 100%; text-align: left; transition: background-color 0.2s; }
+        .sidebar button:hover { background-color: #e2e6ea; }
+        .sidebar button.clear-btn { background-color: var(--danger-red); border-color: var(--danger-red); color: white; margin-top: 20px; }
+        .sidebar button.clear-btn:hover { background-color: #c82333; }
+        .sidebar #loadFile { display: none; }
+        .notification { padding: 10px; margin-top: 15px; border-radius: 4px; font-size: 0.9em; text-align: center; color: var(--primary-blue); background-color: #e6f0ff; border: 1px solid #b3d1ff; display: none; }
+        .form-content { flex-grow: 1; padding: 2.5rem; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-left: 20px; }
+        h2, h3 { color: var(--primary-blue); font-weight: 700; border-bottom: 2px solid var(--primary-blue); padding-bottom: 10px; margin-top: 1.5rem; margin-bottom: 1.5rem; }
+        .form-group, .add-med-group { margin-bottom: 1.25rem; }
+        label { display: block; font-weight: 700; margin-bottom: 0.5rem; }
+        input, textarea, select { width: 100%; padding: 0.75rem; border: 1px solid var(--border-grey); border-radius: 4px; box-sizing: border-box; font-size: 1rem; transition: border-color 0.2s, box-shadow 0.2s; }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: var(--primary-blue); box-shadow: 0 0 0 2px rgba(0, 51, 102, 0.2); }
+        button.submit-btn { background-color: var(--primary-green); color: white; }
+        button.submit-btn:hover { background-color: #218838; }
+        .add-med-group { display: grid; grid-template-columns: 2fr 1fr 1.5fr 1fr; gap: 15px; align-items: end; }
+        .add-med-group button { background-color: var(--primary-blue); }
+        .radio-group { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+        .radio-group input { width: auto; }
+        .radio-group label { margin-bottom: 0; font-weight: normal; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid var(--border-grey); padding: 12px; text-align: left; }
+        th { background-color: var(--light-grey); font-weight: 700; }
+        .remove-btn { background-color: var(--danger-red); padding: 5px 10px; font-size: 0.8rem; width: auto; }
+        .remove-btn:hover { background-color: #c82333; }
+        .info-box { background-color: #f8f9fa; border-left: 4px solid var(--primary-blue); padding: 1rem; margin-bottom: 2rem; font-size: 0.9em; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; padding: 30px; border-radius: 8px; max-width: 700px; width: 90%; max-height: 80vh; overflow-y: auto; }
+        .success-message { text-align: center; padding: 40px; border: 2px solid var(--primary-green); border-radius: 8px; background: #e9f5e9; }
+        .mobile-menu-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--primary-blue); z-index: 1001;
+            display: none; flex-direction: column; align-items: center; justify-content: center; color: white;
+        }
+        .mobile-menu-overlay .sidebar { background-color: transparent; position: static; height: auto; width: 80%; max-width: 300px; }
+        .mobile-menu-overlay .sidebar h3 { color: white; border-bottom-color: rgba(255,255,255,0.3); }
+        .mobile-menu-overlay .sidebar button { background-color: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); }
+        .mobile-menu-overlay .sidebar button:hover { background-color: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.4); }
+        .mobile-menu-overlay .sidebar button.clear-btn { background-color: var(--danger-red); border-color: var(--danger-red); }
+        .mobile-menu-close { position: absolute; top: 20px; right: 20px; font-size: 2.5rem; background: none; border: none; color: white; cursor: pointer; }
+        @media (max-width: 768px) {
+            .site-header h1 { font-size: 1.5rem; }
+            .mobile-menu-icon { display: block; }
+            .sidebar { display: none; }
+            .main-wrapper { flex-direction: column; max-width: 100%; margin: 0; }
+            .form-content { margin-left: 0; border-radius: 0; box-shadow: none; padding: 1.5rem; }
+            .add-med-group { grid-template-columns: 1fr; }
+            h2, h3 { font-size: 1.4rem; }
+            button { padding: 14px 20px; font-size: 1.1rem; }
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <h1>Carndonagh Health Centre</h1>
+        <button class="mobile-menu-icon" onclick="toggleMobileMenu(true)">&#9776;</button>
+    </header>
+    
+    <div class="mobile-menu-overlay" id="mobile-menu">
+        <button class="mobile-menu-close" onclick="toggleMobileMenu(false)">&times;</button>
+        <div class="sidebar">
+            <h3>Actions</h3>
+            <button type="button" onclick="document.getElementById('loadFile').click(); toggleMobileMenu(false);">Load Request</button>
+            <button type="button" onclick="saveRequestToFile(); toggleMobileMenu(false);">Save Request</button>
+            <button type="button" class="print-btn" onclick="printSummary(); toggleMobileMenu(false);">Print Summary</button>
+            <button type="button" class="clear-btn" onclick="clearAllFields(); toggleMobileMenu(false);">Clear All Fields</button>
+            <div class="notification" id="mobile-notification-area"></div>
+        </div>
+    </div>
+    
+    <div class="main-wrapper">
+        <div class="sidebar" id="desktop-sidebar">
+            <h3>Actions</h3>
+            <button type="button" onclick="document.getElementById('loadFile').click()">Load Request</button>
+            <button type="button" onclick="saveRequestToFile()">Save Request</button>
+            <button type="button" class="print-btn" onclick="printSummary()">Print Summary</button>
+            <button type="button" class="clear-btn" onclick="clearAllFields()">Clear Form</button>
+            <input type="file" id="loadFile" onchange="loadRequestFromFile(event)" accept=".json">
+            <div class="notification" id="desktop-notification-area"></div>
+        </div>
+        <div class="form-content" id="formContainer">
+            <h2>Repeat Prescription Request</h2>
+            <div class="info-box"><p><strong>Welcome!</strong> Please fill out your details and requested medications. Your request is automatically saved as you type.</p></div>
+            <div id="patientDetailsSection">
+                <h3>Patient Details</h3>
+                <div class="form-group"><label for="patientName">Full Name</label><input type="text" id="patientName" required></div>
+                <div class="form-group"><label for="patientEmail">Email Address</label><input type="email" id="patientEmail" required></div>
+                <div class="form-group"><label for="patientPhone">Phone Number</label><input type="tel" id="patientPhone" required></div>
+                <div class="form-group"><label for="patientDOB">Date of Birth</label><input type="date" id="patientDOB" required></div>
+                <div class="form-group">
+                    <label>Preferred Contact Method for Updates</label>
+                    <div class="radio-group">
+                        <input type="radio" id="prefEmail" name="communicationPref" value="Email" checked>
+                        <label for="prefEmail">Email</label>
+                        <input type="radio" id="prefWhatsapp" name="communicationPref" value="WhatsApp">
+                        <label for="prefWhatsapp">WhatsApp</label>
+                    </div>
+                </div>
+                <div class="form-group"><label for="patientAddress">Home Address</label><textarea id="patientAddress" rows="3" required></textarea></div>
+                <div class="form-group"><label for="chosenPharmacy">Chosen Pharmacy</label><select id="chosenPharmacy" required></select></div>
+            </div>
+            <h3>Add Your Medications</h3>
+            <div class="add-med-group">
+                <div><label for="medName">Name of Medication</label><input type="text" id="medName" list="medication-list" placeholder="Start typing..."></div>
+                <div><label for="medDosage">Dosage</label><input type="text" id="medDosage" placeholder="e.g., 20mg"></div>
+                <div><label for="medFreq">Frequency</label><select id="medFreq"></select></div>
+                <div><button type="button" onclick="addMedication()">+ Add</button></div>
+            </div>
+            <h3>Your Current Medication List</h3>
+            <table id="medicationTable">
+                <thead><tr><th>Name of Medication</th><th>Dosage</th><th>Frequency</th><th>Action</th></tr></thead>
+                <tbody id="medicationList"></tbody>
+            </table>
+            <br>
+            <button class="submit-btn" onclick="showSummary()">Review & Submit Request</button>
+        </div>
+    </div>
+    <div class="modal-overlay" id="summaryModal">
+        <div class="modal-content">
+            <h3>Confirm Your Request</h3>
+            <div id="summaryDetails"></div>
+            <div class="modal-buttons">
+                <button onclick="submitToGoogleForm()" style="background-color: var(--primary-green);">Confirm & Submit</button>
+                <button onclick="document.getElementById('summaryModal').style.display='none'" style="background-color: var(--danger-red);">Cancel</button>
+            </div>
+        </div>
+    </div>
+    <datalist id="medication-list"></datalist>
 <script>
     // --- FINAL CORRECT CONFIGURATION ---------
     const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSepUNc9-xIpDf_UaM3-OwFFRdZozUoZC3jHRCas0b-gc1NStg/formResponse"; 
