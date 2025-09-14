@@ -295,17 +295,18 @@
         saveToLocalStorage();
     }
 
+    // --- UPDATED CLEAR ALL FIELDS FUNCTION ---
     function clearAllFields() {
         if (confirm("Are you sure you want to clear the entire form?")) {
             populateFormFromData({ patientDetails: {}, medicationList: [] });
             localStorage.removeItem('prescriptionFormData');
-            showNotification("Form cleared.");
+            showNotification("Form cleared."); // Changed from alert() to showNotification()
         }
     }
 
     function showSummary() {
         const { patientDetails, medicationList } = getFormDataAsObject();
-        if (!patientDetails.name || !patientDetails.dob || !patientDetails.address || !patientDetails.email || !patientDetails.phone) { alert("Please fill in all Patient Details, including your email address and phone number."); return; }
+        if (!patientDetails.name || !patientDetails.dob || !patientDetails.address || !patientDetails.email || !patientDetails.phone) { alert("Please fill in all Patient Details."); return; }
         if (medicationList.length === 0) { alert("Please add at least one medication."); return; }
         let summaryHTML = `<p><strong>Name:</strong> ${patientDetails.name}</p><p><strong>Email:</strong> ${patientDetails.email}</p><p><strong>Phone:</strong> ${patientDetails.phone}</p><p><strong>Date of Birth:</strong> ${patientDetails.dob}</p><p><strong>Pharmacy:</strong> ${patientDetails.pharmacy}</p><hr><h3>Medications:</h3><ul>${medicationList.map(med => `<li>${med.name} - ${med.dosage} (${med.freq})</li>`).join('')}</ul>`;
         document.getElementById('summaryDetails').innerHTML = summaryHTML;
