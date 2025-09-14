@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale-1.0">
     <title>Prescription Request Form - Carndonagh Health Centre Style</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -39,22 +39,8 @@
             z-index: 100;
         }
         .site-header h1 { color: var(--primary-blue); font-size: 1.75rem; margin: 0; }
-
-        .mobile-menu-icon {
-            display: none;
-            font-size: 2rem;
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--primary-blue);
-        }
-
-        .main-wrapper {
-            display: flex;
-            max-width: 1200px;
-            margin: 20px auto;
-            align-items: flex-start;
-        }
+        .mobile-menu-icon { display: none; font-size: 2rem; background: none; border: none; cursor: pointer; color: var(--primary-blue); }
+        .main-wrapper { display: flex; max-width: 1200px; margin: 20px auto; align-items: flex-start; }
         .sidebar {
             width: 200px;
             padding: 2.5rem 1rem;
@@ -71,7 +57,6 @@
         .sidebar button.clear-btn:hover { background-color: #c82333; }
         .sidebar #loadFile { display: none; }
         .notification { padding: 10px; margin-top: 15px; border-radius: 4px; font-size: 0.9em; text-align: center; color: var(--primary-blue); background-color: #e6f0ff; border: 1px solid #b3d1ff; display: none; }
-
         .form-content { flex-grow: 1; padding: 2.5rem; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-left: 20px; }
         h2, h3 { color: var(--primary-blue); font-weight: 700; border-bottom: 2px solid var(--primary-blue); padding-bottom: 10px; margin-top: 1.5rem; margin-bottom: 1.5rem; }
         .form-group, .add-med-group { margin-bottom: 1.25rem; }
@@ -82,48 +67,26 @@
         button.submit-btn:hover { background-color: #218838; }
         .add-med-group { display: grid; grid-template-columns: 2fr 1fr 1.5fr 1fr; gap: 15px; align-items: end; }
         .add-med-group button { background-color: var(--primary-blue); }
+        .radio-group { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+        .radio-group input { width: auto; }
+        .radio-group label { margin-bottom: 0; font-weight: normal; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid var(--border-grey); padding: 12px; text-align: left; }
         th { background-color: var(--light-grey); font-weight: 700; }
         .remove-btn { background-color: var(--danger-red); padding: 5px 10px; font-size: 0.8rem; width: auto; }
         .remove-btn:hover { background-color: #c82333; }
         .info-box { background-color: #f8f9fa; border-left: 4px solid var(--primary-blue); padding: 1rem; margin-bottom: 2rem; font-size: 0.9em; }
-        
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: white; padding: 30px; border-radius: 8px; max-width: 700px; width: 90%; max-height: 80vh; overflow-y: auto; }
         .success-message { text-align: center; padding: 40px; border: 2px solid var(--primary-green); border-radius: 8px; background: #e9f5e9; }
-        
-        .mobile-menu-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--primary-blue);
-            z-index: 1001;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
-        }
+        .mobile-menu-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--primary-blue); z-index: 1001; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; }
         .mobile-menu-overlay .sidebar { background-color: transparent; position: static; height: auto; width: 80%; max-width: 300px; }
         .mobile-menu-overlay .sidebar h3 { color: white; border-bottom-color: rgba(255,255,255,0.3); }
         .mobile-menu-overlay .sidebar button { background-color: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); }
         .mobile-menu-overlay .sidebar button:hover { background-color: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.4); }
         .mobile-menu-overlay .sidebar button.clear-btn { background-color: var(--danger-red); border-color: var(--danger-red); }
         .mobile-menu-close { position: absolute; top: 20px; right: 20px; font-size: 2.5rem; background: none; border: none; color: white; cursor: pointer; }
-
-        @media print {
-            body, .print-summary { font-family: 'Times New Roman', Times, serif; color: black; }
-            h1, h2, h3 { color: black; border: none; }
-            .site-header, .sidebar, button, .info-box, .add-med-group, .remove-btn, .mobile-menu-overlay { display: none; }
-            .main-wrapper { max-width: 100%; margin: 0; box-shadow: none; border-radius: 0; }
-            .form-content { padding: 0; }
-        }
-        
         @media (max-width: 768px) {
-            .site-header { position: sticky; }
             .site-header h1 { font-size: 1.5rem; }
             .mobile-menu-icon { display: block; }
             .sidebar { display: none; }
@@ -169,9 +132,18 @@
             <div id="patientDetailsSection">
                 <h3>Patient Details</h3>
                 <div class="form-group"><label for="patientName">Full Name</label><input type="text" id="patientName" required></div>
-                <div class="form-group"><label for="patientEmail">Email Address (for updates)</label><input type="email" id="patientEmail" required></div>
+                <div class="form-group"><label for="patientEmail">Email Address</label><input type="email" id="patientEmail" required></div>
                 <div class="form-group"><label for="patientPhone">Phone Number</label><input type="tel" id="patientPhone" required></div>
                 <div class="form-group"><label for="patientDOB">Date of Birth</label><input type="date" id="patientDOB" required></div>
+                <div class="form-group">
+                    <label>Preferred Contact Method for Updates</label>
+                    <div class="radio-group">
+                        <input type="radio" id="prefEmail" name="communicationPref" value="Email" checked>
+                        <label for="prefEmail">Email</label>
+                        <input type="radio" id="prefWhatsapp" name="communicationPref" value="WhatsApp">
+                        <label for="prefWhatsapp">WhatsApp</label>
+                    </div>
+                </div>
                 <div class="form-group"><label for="patientAddress">Home Address</label><textarea id="patientAddress" rows="3" required></textarea></div>
                 <div class="form-group"><label for="chosenPharmacy">Chosen Pharmacy</label><select id="chosenPharmacy" required></select></div>
             </div>
@@ -211,12 +183,15 @@
     const PATIENT_ADDRESS_ENTRY = "entry.1572836613";
     const PATIENT_PHONE_NO = "entry.1516294764";
     const CHOSEN_PHARMACY_ENTRY = "entry.1118271783";
+    const COMMUNICATION_PREF_ENTRY = "entry.274147264";
     const MEDICATION_LIST_ENTRY = "entry.607030324"; 
 
+    // All other constants (commonMedications, etc.)
     const commonMedications = ["Atorvastatin", "Ramipril", "Amlodipine", "Lansoprazole", "Salbutamol", "Metformin", "Sertraline", "Colecalciferol", "Levothyroxine", "Aspirin", "Bisoprolol", "Paracetamol", "Ibuprofen"];
     const pharmacyOptions = { "Tierney's Healthwise Pharmacy, Buncrana": "Tierney's Healthwise Pharmacy, Buncrana", "Inish Pharmacy, Buncrana": "Inish Pharmacy, Buncrana", "Duffy's Pharmacy, Buncrana": "Duffy's Pharmacy, Buncrana", "Brennan's Pharmacy, Buncrana": "Brennan's Pharmacy, Buncrana", "Hannon's Pharmacy, Moville": "Hannon's Pharmacy, Moville", "Foyle Pharmacy, Moville": "Foyle Pharmacy, Moville", "Brennan's Pharmacy, Clonmany": "Brennan's Pharmacy, Clonmany", "Inish Pharmacy, Muff": "Inish Pharmacy, Muff", "Mullans Pharmacy, Carndonagh": "Mullans Pharmacy, Carndonagh", "Carn Pharmacy, Carndonagh": "Carn Pharmacy, Carndonagh", "McNeill's Pharmacy, Carndonagh": "McNeill's Pharmacy, Carndonagh", "Inish Pharmacy, Carndonagh": "Inish Pharmacy, Carndonagh" };
     const frequencyOptions = {"Once a day": "Once a day", "Twice a day": "Twice a day", "Three times a day": "Three times a day", "Four times a day": "Four times a day"};
     
+    // All JavaScript functions
     document.addEventListener('DOMContentLoaded', () => {
         populateDatalist('medication-list', commonMedications);
         populateSelect('chosenPharmacy', pharmacyOptions);
@@ -253,6 +228,7 @@
             patientDetails: {
                 name: document.getElementById('patientName').value, email: document.getElementById('patientEmail').value, phone: document.getElementById('patientPhone').value,
                 dob: document.getElementById('patientDOB').value, address: document.getElementById('patientAddress').value, pharmacy: document.getElementById('chosenPharmacy').value,
+                commPref: document.querySelector('input[name="communicationPref"]:checked').value
             },
             medicationList: Array.from(document.getElementById('medicationList').rows).map(row => ({ name: row.cells[0].innerText, dosage: row.cells[1].innerText, freq: row.cells[2].innerText }))
         };
@@ -267,6 +243,8 @@
         document.getElementById('patientDOB').value = details.dob || '';
         document.getElementById('patientAddress').value = details.address || '';
         document.getElementById('chosenPharmacy').value = details.pharmacy || '';
+        const commPref = details.commPref || 'Email';
+        document.getElementById(commPref.toLowerCase() === 'whatsapp' ? 'prefWhatsapp' : 'prefEmail').checked = true;
         const tableBody = document.getElementById('medicationList');
         tableBody.innerHTML = "";
         if (data.medicationList && Array.isArray(data.medicationList)) {
@@ -307,7 +285,7 @@
         const { patientDetails, medicationList } = getFormDataAsObject();
         if (!patientDetails.name || !patientDetails.dob || !patientDetails.address || !patientDetails.email || !patientDetails.phone) { alert("Please fill in all Patient Details."); return; }
         if (medicationList.length === 0) { alert("Please add at least one medication."); return; }
-        let summaryHTML = `<p><strong>Name:</strong> ${patientDetails.name}</p><p><strong>Email:</strong> ${patientDetails.email}</p><p><strong>Phone:</strong> ${patientDetails.phone}</p><p><strong>Date of Birth:</strong> ${patientDetails.dob}</p><p><strong>Pharmacy:</strong> ${patientDetails.pharmacy}</p><hr><h3>Medications:</h3><ul>${medicationList.map(med => `<li>${med.name} - ${med.dosage} (${med.freq})</li>`).join('')}</ul>`;
+        let summaryHTML = `<p><strong>Name:</strong> ${patientDetails.name}</p><p><strong>Email:</strong> ${patientDetails.email}</p><p><strong>Phone:</strong> ${patientDetails.phone}</p><p><strong>Date of Birth:</strong> ${patientDetails.dob}</p><p><strong>Pharmacy:</strong> ${patientDetails.pharmacy}</p><p><strong>Contact Preference:</strong> ${patientDetails.commPref}</p><hr><h3>Medications:</h3><ul>${medicationList.map(med => `<li>${med.name} - ${med.dosage} (${med.freq})</li>`).join('')}</ul>`;
         document.getElementById('summaryDetails').innerHTML = summaryHTML;
         document.getElementById('summaryModal').style.display = 'flex';
     }
@@ -381,47 +359,23 @@
         event.target.value = null;
     }
     
-    // --- UPDATED SUBMISSION FUNCTION ---
     function submitToGoogleForm() {
         const { patientDetails, medicationList } = getFormDataAsObject();
-        if (GOOGLE_FORM_URL.includes("1FAIpQLS") === false) {
-            alert("SYSTEM ERROR: The form has not been configured.");
-            return;
-        }
-        
+        if (GOOGLE_FORM_URL.includes("1FAIpQLS") === false) { alert("SYSTEM ERROR: The form has not been configured."); return; }
         const medicationText = medicationList.map(med => `${med.name}~${med.dosage}~${med.freq}`).join("|");
-        
-        // Prepare data for background submission
-        const formData = new FormData();
-        formData.append(PATIENT_NAME_ENTRY, patientDetails.name);
-        formData.append(PATIENT_EMAIL_ENTRY, patientDetails.email);
-        formData.append(PATIENT_PHONE_NO, patientDetails.phone);
-        formData.append(PATIENT_DOB_ENTRY, patientDetails.dob);
-        formData.append(PATIENT_ADDRESS_ENTRY, patientDetails.address);
-        formData.append(CHOSEN_PHARMACY_ENTRY, patientDetails.pharmacy);
-        formData.append(MEDICATION_LIST_ENTRY, medicationText);
-
-        // Send the data in the background
-        fetch(GOOGLE_FORM_URL, {
-            method: 'POST',
-            body: formData,
-            mode: 'no-cors' // Important to avoid CORS errors
-        }).catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred while submitting the form. Please try again.');
-        });
-        
-        // Show success message immediately
+        const finalUrl = new URL(GOOGLE_FORM_URL.replace('/formResponse', '/viewform'));
+        finalUrl.searchParams.append(PATIENT_NAME_ENTRY, patientDetails.name);
+        finalUrl.searchParams.append(PATIENT_EMAIL_ENTRY, patientDetails.email);
+        finalUrl.searchParams.append(PATIENT_PHONE_NO, patientDetails.phone);
+        finalUrl.searchParams.append(PATIENT_DOB_ENTRY, patientDetails.dob);
+        finalUrl.searchParams.append(PATIENT_ADDRESS_ENTRY, patientDetails.address);
+        finalUrl.searchParams.append(CHOSEN_PHARMACY_ENTRY, patientDetails.pharmacy);
+        finalUrl.searchParams.append(COMMUNICATION_PREF_ENTRY, patientDetails.commPref);
+        finalUrl.searchParams.append(MEDICATION_LIST_ENTRY, medicationText);
+        window.open(finalUrl.toString(), '_blank');
         document.getElementById('summaryModal').style.display = 'none';
         const ref = generateReferenceNumber();
-        document.getElementById('formContainer').innerHTML = `
-            <div class="success-message">
-                <h2>Thank You!</h2>
-                <p>Your prescription request has been submitted.</p>
-                <p>Your reference number is: <strong>${ref}</strong></p>
-                <p>Please keep this for your records.</p>
-            </div>
-        `;
+        document.getElementById('formContainer').innerHTML = `<div class="success-message"><h2>Request Prepared</h2><p>Your prescription request is ready in the new tab.</p><p><strong>Please review the details and click the 'Submit' button on that page to complete your request.</strong></p><p>Your reference number is: <strong>${ref}</strong></p></div>`;
     }
 </script>
 </body>
