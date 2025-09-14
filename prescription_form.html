@@ -101,6 +101,7 @@
         .mobile-menu-overlay .sidebar button:hover { background-color: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.4); }
         .mobile-menu-overlay .sidebar button.clear-btn { background-color: var(--danger-red); border-color: var(--danger-red); }
         .mobile-menu-close { position: absolute; top: 20px; right: 20px; font-size: 2.5rem; background: none; border: none; color: white; cursor: pointer; }
+        .error-message { color: var(--danger-red); font-size: 0.85em; margin-top: 5px; min-height: 1em; }
         @media (max-width: 768px) {
             .site-header h1 { font-size: 1.5rem; }
             .mobile-menu-icon { display: block; }
@@ -146,10 +147,10 @@
             <div class="info-box"><p><strong>Welcome!</strong> Please fill out your details and requested medications. Your request is automatically saved as you type.</p></div>
             <div id="patientDetailsSection">
                 <h3>Patient Details</h3>
-                <div class="form-group"><label for="patientName">Full Name</label><input type="text" id="patientName" required></div>
-                <div class="form-group"><label for="patientEmail">Email Address</label><input type="email" id="patientEmail" required></div>
-                <div class="form-group"><label for="patientPhone">Phone Number</label><input type="tel" id="patientPhone" required></div>
-                <div class="form-group"><label for="patientDOB">Date of Birth</label><input type="date" id="patientDOB" required></div>
+                <div class="form-group"><label for="patientName">Full Name</label><input type="text" id="patientName" required><div class="error-message" id="patientName-error"></div></div>
+                <div class="form-group"><label for="patientEmail">Email Address</label><input type="email" id="patientEmail" required><div class="error-message" id="patientEmail-error"></div></div>
+                <div class="form-group"><label for="patientPhone">Phone Number</label><input type="tel" id="patientPhone" required><div class="error-message" id="patientPhone-error"></div></div>
+                <div class="form-group"><label for="patientDOB">Date of Birth</label><input type="date" id="patientDOB" required><div class="error-message" id="patientDOB-error"></div></div>
                 <div class="form-group">
                     <label>Preferred Contact Method for Updates</label>
                     <div class="radio-group">
@@ -159,8 +160,8 @@
                         <label for="prefWhatsapp">WhatsApp</label>
                     </div>
                 </div>
-                <div class="form-group"><label for="patientAddress">Home Address</label><textarea id="patientAddress" rows="3" required></textarea></div>
-                <div class="form-group"><label for="chosenPharmacy">Chosen Pharmacy</label><select id="chosenPharmacy" required></select></div>
+                <div class="form-group"><label for="patientAddress">Home Address</label><textarea id="patientAddress" rows="3" required></textarea><div class="error-message" id="patientAddress-error"></div></div>
+                <div class="form-group"><label for="chosenPharmacy">Chosen Pharmacy</label><select id="chosenPharmacy" required></select><div class="error-message" id="chosenPharmacy-error"></div></div>
             </div>
             <h3>Add Your Medications</h3>
             <div class="add-med-group">
@@ -169,6 +170,7 @@
                 <div><label for="medFreq">Frequency</label><select id="medFreq"></select></div>
                 <div><button type="button" onclick="addMedication()">+ Add</button></div>
             </div>
+            <div class="error-message" id="medication-error"></div>
             <h3>Your Current Medication List</h3>
             <table id="medicationTable">
                 <thead><tr><th>Name of Medication</th><th>Dosage</th><th>Frequency</th><th>Action</th></tr></thead>
@@ -190,30 +192,39 @@
     </div>
     <datalist id="medication-list"></datalist>
 <script>
-    // --- FINAL CORRECT CONFIGURATION ---------
-    const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSepUNc9-xIpDf_UaM3-OwFFRdZozUoZC3jHRCas0b-gc1NStg/formResponse"; 
-    const PATIENT_NAME_ENTRY = "entry.1775196617"; 
-    const PATIENT_EMAIL_ENTRY = "entry.2008110253";
-    const PATIENT_DOB_ENTRY = "entry.1011602497";
-    const PATIENT_ADDRESS_ENTRY = "entry.1572836613";
-    const PATIENT_PHONE_NO = "entry.1516294764";
-    const CHOSEN_PHARMACY_ENTRY = "entry.1118271783";
-    const COMMUNICATION_PREF_ENTRY = "entry.274147264";
-    const MEDICATION_LIST_ENTRY = "entry.607030324"; 
+    // --- CONFIGURATION ---------
+    const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSepUNc9-xIpDf_UaM3-OwFFRdZozUoZC3jHRCas0b-gc1NStg/formResponse";
+    const FORM_ENTRIES = {
+        patientName: "entry.1775196617",
+        patientEmail: "entry.2008110253",
+        patientDOB: "entry.1011602497",
+        patientAddress: "entry.1572836613",
+        patientPhone: "entry.1516294764",
+        chosenPharmacy: "entry.1118271783",
+        commPref: "entry.274147264",
+        medicationList: "entry.607030324"
+    };
 
     const commonMedications = ["Atorvastatin", "Ramipril", "Amlodipine", "Lansoprazole", "Salbutamol", "Metformin", "Sertraline", "Colecalciferol", "Levothyroxine", "Aspirin", "Bisoprolol", "Paracetamol", "Ibuprofen"];
     const pharmacyOptions = { "Tierney's Healthwise Pharmacy, Buncrana": "Tierney's Healthwise Pharmacy, Buncrana", "Inish Pharmacy, Buncrana": "Inish Pharmacy, Buncrana", "Duffy's Pharmacy, Buncrana": "Duffy's Pharmacy, Buncrana", "Brennan's Pharmacy, Buncrana": "Brennan's Pharmacy, Buncrana", "Hannon's Pharmacy, Moville": "Hannon's Pharmacy, Moville", "Foyle Pharmacy, Moville": "Foyle Pharmacy, Moville", "Brennan's Pharmacy, Clonmany": "Brennan's Pharmacy, Clonmany", "Inish Pharmacy, Muff": "Inish Pharmacy, Muff", "Mullans Pharmacy, Carndonagh": "Mullans Pharmacy, Carndonagh", "Carn Pharmacy, Carndonagh": "Carn Pharmacy, Carndonagh", "McNeill's Pharmacy, Carndonagh": "McNeill's Pharmacy, Carndonagh", "Inish Pharmacy, Carndonagh": "Inish Pharmacy, Carndonagh" };
-    const frequencyOptions = {"Once a day": "Once a day", "Twice a day": "Twice a day", "Three times a day": "Three times a day", "Four times a day": "Four times a day"};
-    
+    const frequencyOptions = { "Once a day": "Once a day", "Twice a day": "Twice a day", "Three times a day": "Three times a day", "Four times a day": "Four times a day" };
+
+    // --- INITIALIZATION ---
     document.addEventListener('DOMContentLoaded', () => {
         populateDatalist('medication-list', commonMedications);
         populateSelect('chosenPharmacy', pharmacyOptions);
         populateSelect('medFreq', frequencyOptions);
         loadFromLocalStorage();
         const inputs = document.querySelectorAll('#patientDetailsSection input, #patientDetailsSection textarea, #patientDetailsSection select');
-        inputs.forEach(input => input.addEventListener('input', saveToLocalStorage));
+        inputs.forEach(input => {
+            input.addEventListener('input', () => {
+                clearError(input.id);
+                saveToLocalStorage();
+            });
+        });
     });
 
+    // --- DOM & DATA POPULATION ---
     function populateDatalist(id, options) {
         const datalist = document.getElementById(id);
         options.forEach(option => {
@@ -235,7 +246,7 @@
             select.appendChild(optionElement);
         }
     }
-    
+
     function getFormDataAsObject() {
         return {
             patientDetails: {
@@ -243,7 +254,7 @@
                 dob: document.getElementById('patientDOB').value, address: document.getElementById('patientAddress').value, pharmacy: document.getElementById('chosenPharmacy').value,
                 commPref: document.querySelector('input[name="communicationPref"]:checked').value
             },
-            medicationList: Array.from(document.getElementById('medicationList').rows).map(row => ({ name: row.cells[0].innerText, dosage: row.cells[1].innerText, freq: row.cells[2].innerText }))
+            medicationList: Array.from(document.getElementById('medicationList').rows).map(row => ({ name: row.cells[0].textContent, dosage: row.cells[1].textContent, freq: row.cells[2].textContent }))
         };
     }
 
@@ -265,20 +276,40 @@
         }
     }
 
+    // --- MEDICATION MANAGEMENT ---
     function addMedication() {
-        const name = document.getElementById('medName').value.trim();
-        const dosage = document.getElementById('medDosage').value.trim();
+        clearError('medication');
+        const nameInput = document.getElementById('medName');
+        const dosageInput = document.getElementById('medDosage');
         const freq = document.getElementById('medFreq').value;
-        if (name === "" || dosage === "") { alert("Please fill in the medication name and dosage."); return; }
+        const name = nameInput.value.trim();
+        const dosage = dosageInput.value.trim();
+
+        if (name === "" || dosage === "") {
+            showError('medication', "Please fill in both medication name and dosage.");
+            return;
+        }
         createMedicationRow(name, dosage, freq);
-        document.getElementById('medName').value = "";
-        document.getElementById('medDosage').value = "";
+        nameInput.value = "";
+        dosageInput.value = "";
         saveToLocalStorage();
+        nameInput.focus();
     }
 
     function createMedicationRow(name, dosage, freq) {
-        const row = document.getElementById('medicationList').insertRow();
-        row.innerHTML = `<td>${name}</td><td>${dosage}</td><td>${freq}</td><td><button class="remove-btn" onclick="removeMedication(this)">Remove</button></td>`;
+        const tableBody = document.getElementById('medicationList');
+        const row = tableBody.insertRow();
+        
+        row.insertCell().textContent = name;
+        row.insertCell().textContent = dosage;
+        row.insertCell().textContent = freq;
+
+        const actionCell = row.insertCell();
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-btn';
+        removeBtn.textContent = 'Remove';
+        removeBtn.onclick = () => removeMedication(removeBtn);
+        actionCell.appendChild(removeBtn);
     }
 
     function removeMedication(button) {
@@ -286,6 +317,7 @@
         saveToLocalStorage();
     }
 
+    // --- FORM ACTIONS ---
     function clearAllFields() {
         if (confirm("Are you sure you want to clear the entire form?")) {
             populateFormFromData({ patientDetails: {}, medicationList: [] });
@@ -295,14 +327,98 @@
     }
 
     function showSummary() {
+        if (!validateForm()) return;
+
         const { patientDetails, medicationList } = getFormDataAsObject();
-        if (!patientDetails.name || !patientDetails.dob || !patientDetails.address || !patientDetails.email || !patientDetails.phone) { alert("Please fill in all Patient Details."); return; }
-        if (medicationList.length === 0) { alert("Please add at least one medication."); return; }
         let summaryHTML = `<p><strong>Name:</strong> ${patientDetails.name}</p><p><strong>Email:</strong> ${patientDetails.email}</p><p><strong>Phone:</strong> ${patientDetails.phone}</p><p><strong>Date of Birth:</strong> ${patientDetails.dob}</p><p><strong>Pharmacy:</strong> ${patientDetails.pharmacy}</p><p><strong>Contact Preference:</strong> ${patientDetails.commPref}</p><hr><h3>Medications:</h3><ul>${medicationList.map(med => `<li>${med.name} - ${med.dosage} (${med.freq})</li>`).join('')}</ul>`;
         document.getElementById('summaryDetails').innerHTML = summaryHTML;
         document.getElementById('summaryModal').style.display = 'flex';
     }
+    
+    function submitToGoogleForm() {
+        if (!validateForm()) {
+            showNotification("Please correct the errors before submitting.");
+            return;
+        }
 
+        const { patientDetails, medicationList } = getFormDataAsObject();
+        const medicationText = medicationList.map(med => `${med.name}~${med.dosage}~${med.freq}`).join("|");
+        
+        const formData = new FormData();
+        formData.append(FORM_ENTRIES.patientName, patientDetails.name);
+        formData.append(FORM_ENTRIES.patientEmail, patientDetails.email);
+        formData.append(FORM_ENTRIES.patientPhone, patientDetails.phone);
+        formData.append(FORM_ENTRIES.patientDOB, patientDetails.dob);
+        formData.append(FORM_ENTRIES.patientAddress, patientDetails.address);
+        formData.append(FORM_ENTRIES.chosenPharmacy, patientDetails.pharmacy);
+        formData.append(FORM_ENTRIES.commPref, patientDetails.commPref);
+        formData.append(FORM_ENTRIES.medicationList, medicationText);
+
+        fetch(GOOGLE_FORM_URL, {
+            method: 'POST',
+            body: formData,
+            mode: 'no-cors'
+        }).catch(error => {
+            console.error('Error:', error);
+            showNotification('An error occurred while submitting. Please try again.');
+        });
+        
+        document.getElementById('summaryModal').style.display = 'none';
+        const ref = generateReferenceNumber();
+        document.getElementById('formContainer').innerHTML = `
+            <div class="success-message">
+                <h2>Thank You!</h2>
+                <p>Your prescription request has been submitted.</p>
+                <p>Your reference number is: <strong>${ref}</strong></p>
+                <p>Please keep this for your records.</p>
+            </div>
+        `;
+        localStorage.removeItem('prescriptionFormData');
+    }
+
+    // --- UTILITY & HELPER FUNCTIONS ---
+    function validateForm() {
+        let isValid = true;
+        const details = getFormDataAsObject().patientDetails;
+        const fieldsToValidate = {
+            patientName: "Full Name is required.",
+            patientEmail: "A valid Email Address is required.",
+            patientPhone: "Phone Number is required.",
+            patientDOB: "Date of Birth is required.",
+            patientAddress: "Home Address is required.",
+            chosenPharmacy: "Please select a pharmacy."
+        };
+
+        for (const [id, message] of Object.entries(fieldsToValidate)) {
+            const element = document.getElementById(id);
+            if (!element.value) {
+                isValid = false;
+                showError(id, message);
+            } else {
+                clearError(id);
+            }
+        }
+        
+        if (document.getElementById('medicationList').rows.length === 0) {
+            isValid = false;
+            showError('medication', "Please add at least one medication to the list.");
+        } else {
+            clearError('medication');
+        }
+
+        return isValid;
+    }
+
+    function showError(id, message) {
+        const errorDiv = document.getElementById(`${id}-error`);
+        if (errorDiv) errorDiv.textContent = message;
+    }
+
+    function clearError(id) {
+        const errorDiv = document.getElementById(`${id}-error`);
+        if (errorDiv) errorDiv.textContent = '';
+    }
+    
     function printSummary() {
         const { patientDetails, medicationList } = getFormDataAsObject();
         const printWindow = window.open('', '_blank');
@@ -342,7 +458,10 @@
     function saveRequestToFile() {
         const formData = getFormDataAsObject();
         const patientName = formData.patientDetails.name;
-        if (!patientName) { alert("Please enter a patient name before saving."); return; }
+        if (!patientName) {
+            showError('patientName', 'Please enter a patient name before saving.');
+            return;
+        }
         const dataStr = JSON.stringify(formData, null, 2);
         const dataBlob = new Blob([dataStr], {type: "application/json"});
         const url = URL.createObjectURL(dataBlob);
@@ -370,46 +489,6 @@
         };
         reader.readAsText(file);
         event.target.value = null;
-    }
-    
-    function submitToGoogleForm() {
-        const { patientDetails, medicationList } = getFormDataAsObject();
-        if (GOOGLE_FORM_URL.includes("1FAIpQLS") === false) {
-            alert("SYSTEM ERROR: The form has not been configured.");
-            return;
-        }
-        
-        const medicationText = medicationList.map(med => `${med.name}~${med.dosage}~${med.freq}`).join("|");
-        
-        const formData = new FormData();
-        formData.append(PATIENT_NAME_ENTRY, patientDetails.name);
-        formData.append(PATIENT_EMAIL_ENTRY, patientDetails.email);
-        formData.append(PATIENT_PHONE_NO, patientDetails.phone);
-        formData.append(PATIENT_DOB_ENTRY, patientDetails.dob);
-        formData.append(PATIENT_ADDRESS_ENTRY, patientDetails.address);
-        formData.append(CHOSEN_PHARMACY_ENTRY, patientDetails.pharmacy);
-        formData.append(COMMUNICATION_PREF_ENTRY, patientDetails.commPref);
-        formData.append(MEDICATION_LIST_ENTRY, medicationText);
-
-        fetch(GOOGLE_FORM_URL, {
-            method: 'POST',
-            body: formData,
-            mode: 'no-cors'
-        }).catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred while submitting the form. Please try again.');
-        });
-        
-        document.getElementById('summaryModal').style.display = 'none';
-        const ref = generateReferenceNumber();
-        document.getElementById('formContainer').innerHTML = `
-            <div class="success-message">
-                <h2>Thank You!</h2>
-                <p>Your prescription request has been submitted.</p>
-                <p>Your reference number is: <strong>${ref}</strong></p>
-                <p>Please keep this for your records.</p>
-            </div>
-        `;
     }
 </script>
 </body>
