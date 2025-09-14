@@ -381,22 +381,47 @@
         event.target.value = null;
     }
     
+    // --- UPDATED SUBMISSION FUNCTION ---
     function submitToGoogleForm() {
         const { patientDetails, medicationList } = getFormDataAsObject();
-        if (GOOGLE_FORM_URL.includes("1FAIpQLS") === false) { alert("SYSTEM ERROR: The form has not been configured."); return; }
+        if (GOOGLE_FORM_URL.includes("1FAIpQLS") === false) {
+            alert("SYSTEM ERROR: The form has not been configured.");
+            return;
+        }
+        
         const medicationText = medicationList.map(med => `${med.name}~${med.dosage}~${med.freq}`).join("|");
-        const finalUrl = new URL(GOOGLE_FORM_URL.replace('/formResponse', '/viewform'));
-        finalUrl.searchParams.append(PATIENT_NAME_ENTRY, patientDetails.name);
-        finalUrl.searchParams.append(PATIENT_EMAIL_ENTRY, patientDetails.email);
-        finalUrl.searchParams.append(PATIENT_PHONE_NO, patientDetails.phone);
-        finalUrl.searchParams.append(PATIENT_DOB_ENTRY, patientDetails.dob);
-        finalUrl.searchParams.append(PATIENT_ADDRESS_ENTRY, patientDetails.address);
-        finalUrl.searchParams.append(CHOSEN_PHARMACY_ENTRY, patientDetails.pharmacy);
-        finalUrl.searchParams.append(MEDICATION_LIST_ENTRY, medicationText);
-        window.open(finalUrl.toString(), '_blank');
+        
+        // Prepare data for background submission
+        const formData = new FormData();
+        formData.append(PATIENT_NAME_ENTRY, patientDetails.name);
+        formData.append(PATIENT_EMAIL_ENTRY, patientDetails.email);
+        formData.append(PATIENT_PHONE_NO, patientDetails.phone);
+        formData.append(PATIENT_DOB_ENTRY, patientDetails.dob);
+        formData.append(PATIENT_ADDRESS_ENTRY, patientDetails.address);
+        formData.append(CHOSEN_PHARMACY_ENTRY, patientDetails.pharmacy);
+        formData.append(MEDICATION_LIST_ENTRY, medicationText);
+
+        // Send the data in the background
+        fetch(GOOGLE_FORM_URL, {
+            method: 'POST',
+            body: formData,
+            mode: 'no-cors' // Important to avoid CORS errors
+        }).catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while submitting the form. Please try again.');
+        });
+        
+        // Show success message immediately
         document.getElementById('summaryModal').style.display = 'none';
         const ref = generateReferenceNumber();
-        document.getElementById('formContainer').innerHTML = `<div class="success-message"><h2>Request Prepared</h2><p>Your prescription request is ready in the new tab.</p><p><strong>Please review the details and click the 'Submit' button on that page to complete your request.</strong></p><p>Your reference number is: <strong>${ref}</strong></p></div>`;
+        document.getElementById('formContainer').innerHTML = `
+            <div class="success-message">
+                <h2>Thank You!</h2>
+                <p>Your prescription request has been submitted.</p>
+                <p>Your reference number is: <strong>${ref}</strong></p>
+                <p>Please keep this for your records.</p>
+            </div>
+        `;
     }
 </script>
 </body>
