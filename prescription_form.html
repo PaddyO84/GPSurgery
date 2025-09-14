@@ -295,12 +295,12 @@
         saveToLocalStorage();
     }
 
-    // --- UPDATED CLEAR ALL FIELDS FUNCTION ---
+    // --- CORRECTED CLEAR ALL FIELDS FUNCTION ---
     function clearAllFields() {
         if (confirm("Are you sure you want to clear the entire form?")) {
             populateFormFromData({ patientDetails: {}, medicationList: [] });
             localStorage.removeItem('prescriptionFormData');
-            showNotification("Form cleared."); // Changed from alert() to showNotification()
+            showNotification("Form cleared."); // Corrected from alert() to showNotification()
         }
     }
 
