@@ -42,7 +42,7 @@ function onEdit(e) {
     return;
   }
 
-  const status = range.getValue();
+  const status = range.getValue().toString().trim();
   const patientEmail = sheet.getRange(row, EMAIL_COL).getValue();
   const patientName = sheet.getRange(row, NAME_COL).getValue();
 
