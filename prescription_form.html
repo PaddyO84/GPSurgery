@@ -9,26 +9,30 @@
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-blue: #003366;
-            --primary-green: #28a745;
+            --primary-text: #1c1c1c;
+            --primary-accent: #0073a3; /* Muted Teal/Blue for links and accents */
+            --button-bg: #272727; /* Dark grey for buttons */
+            --button-text: #ffffff;
             --danger-red: #dc3545;
-            --light-grey: #f8f9fa;
-            --border-grey: #dee2e6;
-            --text-dark: #343a40;
+            --light-grey: #f5f5f5;
+            --border-grey: #e3e3e3;
+            --white: #ffffff;
             --header-height: 70px;
+            --font-primary: 'proxima-nova', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            --font-secondary: 'garamond-premier-pro-display', Georgia, serif;
         }
         body {
-            font-family: 'Lato', sans-serif;
+            font-family: var(--font-primary);
             margin: 0;
             background-color: var(--light-grey);
-            color: var(--text-dark);
-            line-height: 1.6;
+            color: var(--primary-text);
+            line-height: 1.8;
+            font-size: 14px;
         }
         .site-header {
-            background-color: #ffffff;
+            background-color: var(--white);
             padding: 1rem 2rem;
             border-bottom: 1px solid var(--border-grey);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             height: var(--header-height);
             display: flex;
             align-items: center;
@@ -38,14 +42,20 @@
             top: 0;
             z-index: 100;
         }
-        .site-header h1 { color: var(--primary-blue); font-size: 1.75rem; margin: 0; }
+        .site-header h1 {
+            font-family: var(--font-secondary);
+            font-weight: 400;
+            font-size: 2rem;
+            margin: 0;
+            color: var(--primary-text);
+        }
         .mobile-menu-icon {
             display: none;
             font-size: 2rem;
             background: none;
             border: none;
             cursor: pointer;
-            color: var(--primary-blue);
+            color: var(--primary-text);
         }
         .main-wrapper {
             display: flex;
@@ -62,40 +72,97 @@
             height: calc(100vh - var(--header-height));
             overflow-y: auto;
         }
-        .sidebar h3 { color: var(--primary-blue); border-bottom: 1px solid var(--border-grey); padding-bottom: 10px; margin-top: 0; margin-bottom: 1.5rem; font-size: 1.2rem; }
-        .sidebar button { background-color: var(--light-grey); color: var(--primary-blue); padding: 10px 15px; margin-bottom: 10px; border: 1px solid var(--border-grey); border-radius: 4px; cursor: pointer; font-size: 0.95rem; width: 100%; text-align: left; transition: background-color 0.2s; }
-        .sidebar button:hover { background-color: #e2e6ea; }
+        .sidebar h3 {
+            font-family: var(--font-primary);
+            font-weight: 600;
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--primary-text);
+            border-bottom: 1px solid var(--border-grey);
+            padding-bottom: 10px;
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+        }
+        .sidebar button {
+            background-color: var(--light-grey);
+            color: var(--primary-text);
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border-grey);
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: var(--font-primary);
+            font-size: 0.95rem;
+            width: 100%;
+            text-align: left;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .sidebar button:hover { background-color: var(--primary-accent); color: var(--white); }
         .sidebar button.clear-btn { background-color: var(--danger-red); border-color: var(--danger-red); color: white; margin-top: 20px; }
-        .sidebar button.clear-btn:hover { background-color: #c82333; }
+        .sidebar button.clear-btn:hover { opacity: 0.8; }
         .sidebar #loadFile { display: none; }
-        .notification { padding: 10px; margin-top: 15px; border-radius: 4px; font-size: 0.9em; text-align: center; color: var(--primary-blue); background-color: #e6f0ff; border: 1px solid #b3d1ff; display: none; }
-        .form-content { flex-grow: 1; padding: 2.5rem; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-left: 20px; }
-        h2, h3 { color: var(--primary-blue); font-weight: 700; border-bottom: 2px solid var(--primary-blue); padding-bottom: 10px; margin-top: 1.5rem; margin-bottom: 1.5rem; }
+        .notification { padding: 10px; margin-top: 15px; border-radius: 4px; font-size: 0.9em; text-align: center; color: var(--primary-text); background-color: #e6f0ff; border: 1px solid #b3d1ff; display: none; }
+        .form-content { flex-grow: 1; padding: 2.5rem; background-color: var(--white); border-radius: 8px; margin-left: 20px; }
+        h2 {
+            font-family: var(--font-secondary);
+            font-weight: 300;
+            font-size: 28px;
+            letter-spacing: .5px;
+            color: var(--primary-text);
+            border-bottom: 1px solid var(--border-grey);
+            padding-bottom: 10px;
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        h3 {
+            font-family: var(--font-primary);
+            font-weight: 300;
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--primary-text);
+            border-bottom: 1px solid var(--border-grey);
+            padding-bottom: 10px;
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
         .form-group, .add-med-group { margin-bottom: 1.25rem; }
-        label { display: block; font-weight: 700; margin-bottom: 0.5rem; }
-        input, textarea, select { width: 100%; padding: 0.75rem; border: 1px solid var(--border-grey); border-radius: 4px; box-sizing: border-box; font-size: 1rem; transition: border-color 0.2s, box-shadow 0.2s; }
-        input:focus, textarea:focus, select:focus { outline: none; border-color: var(--primary-blue); box-shadow: 0 0 0 2px rgba(0, 51, 102, 0.2); }
-        button.submit-btn { background-color: var(--primary-green); color: white; }
-        button.submit-btn:hover { background-color: #218838; }
-        .add-med-group { display: grid; grid-template-columns: 2fr 1fr 1.5fr 1fr; gap: 15px; align-items: end; }
-        .add-med-group button { background-color: var(--primary-blue); }
+        label { display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
+        input, textarea, select { width: 100%; padding: 0.75rem; border: 1px solid var(--border-grey); border-radius: 3px; box-sizing: border-box; font-size: 1rem; transition: border-color 0.2s, box-shadow 0.2s; background: var(--light-grey); }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: var(--primary-accent); box-shadow: 0 0 0 2px rgba(0, 115, 163, 0.2); background: var(--white); }
+        button, .button {
+            font-family: var(--font-primary);
+            font-weight: 400;
+            font-style: normal;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background-color: var(--button-bg);
+            color: var(--button-text);
+            border: none;
+            padding: 1em 2.5em;
+            cursor: pointer;
+            transition: opacity .1s ease-out;
+        }
+        button:hover, .button:hover { opacity: 0.8; }
+        .add-med-group { display: grid; grid-template-columns: 2fr 1fr 1.5fr auto; gap: 15px; align-items: end; }
         .radio-group { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
         .radio-group input { width: auto; }
-        .radio-group label { margin-bottom: 0; font-weight: normal; }
+        .radio-group label { margin-bottom: 0; font-weight: normal; text-transform: none; letter-spacing: 0; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid var(--border-grey); padding: 12px; text-align: left; }
-        th { background-color: var(--light-grey); font-weight: 700; }
+        th { background-color: var(--light-grey); font-weight: 600; text-transform: uppercase; font-size: 12px; letter-spacing: 1px; }
         .remove-btn { background-color: var(--danger-red); padding: 5px 10px; font-size: 0.8rem; width: auto; }
-        .remove-btn:hover { background-color: #c82333; }
-        .info-box { background-color: #f8f9fa; border-left: 4px solid var(--primary-blue); padding: 1rem; margin-bottom: 2rem; font-size: 0.9em; }
+        .remove-btn:hover { opacity: 0.8; }
+        .info-box { background-color: rgba(0, 115, 163, 0.05); border-left: 4px solid var(--primary-accent); padding: 1rem; margin-bottom: 2rem; font-size: 0.9em; }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: white; padding: 30px; border-radius: 8px; max-width: 700px; width: 90%; max-height: 80vh; overflow-y: auto; }
         .modal-buttons { margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px; }
-        .modal-buttons button.btn-confirm { background-color: var(--primary-green); }
+        .modal-buttons button.btn-confirm { background-color: var(--button-bg); }
         .modal-buttons button.btn-cancel { background-color: var(--danger-red); }
-        .success-message { text-align: center; padding: 40px; border: 2px solid var(--primary-green); border-radius: 8px; background: #e9f5e9; }
+        .success-message { text-align: center; padding: 40px; border: 2px solid var(--button-bg); border-radius: 8px; background: var(--light-grey); }
         .mobile-menu-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--primary-blue); z-index: 1001;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--button-bg); z-index: 1001;
             display: none; flex-direction: column; align-items: center; justify-content: center; color: white;
         }
         .mobile-menu-overlay .sidebar { background-color: transparent; position: static; height: auto; width: 80%; max-width: 300px; }
@@ -106,7 +173,7 @@
         .mobile-menu-close { position: absolute; top: 20px; right: 20px; font-size: 2.5rem; background: none; border: none; color: white; cursor: pointer; }
         .error-message { color: var(--danger-red); font-size: 0.85em; margin-top: 5px; min-height: 1em; }
         @media (max-width: 768px) {
-            .site-header h1 { font-size: 1.5rem; }
+            .site-header h1 { font-size: 1.2rem; }
             .mobile-menu-icon { display: block; }
             #desktop-sidebar { display: none; }
             .main-wrapper { flex-direction: column; max-width: 100%; margin: 0; }
@@ -122,7 +189,7 @@
         <h1>Carndonagh Health Centre</h1>
         <button class="mobile-menu-icon" onclick="toggleMobileMenu(true)">&#9776;</button>
     </header>
-    
+
     <div class="mobile-menu-overlay" id="mobile-menu">
         <button class="mobile-menu-close" onclick="toggleMobileMenu(false)">&times;</button>
         <div class="sidebar">
@@ -134,7 +201,7 @@
             <div class="notification" id="mobile-notification-area"></div>
         </div>
     </div>
-    
+
     <div class="main-wrapper">
         <div class="sidebar" id="desktop-sidebar">
             <h3>Actions</h3>
@@ -183,9 +250,9 @@
             <button class="submit-btn" onclick="showSummary()">Review & Submit Request</button>
         </div>
     </div>
-    <div class="modal-overlay" id="summaryModal">
+    <div class="modal-overlay" id="summaryModal" role="dialog" aria-modal="true" aria-labelledby="summaryModalTitle">
         <div class="modal-content">
-            <h3>Confirm Your Request</h3>
+            <h3 id="summaryModalTitle">Confirm Your Request</h3>
             <div id="summaryDetails"></div>
             <div class="modal-buttons">
                 <button onclick="submitToGoogleForm()" class="btn-confirm">Confirm & Submit</button>
@@ -302,7 +369,7 @@
     function createMedicationRow(name, dosage, freq) {
         const tableBody = document.getElementById('medicationList');
         const row = tableBody.insertRow();
-        
+
         row.insertCell().textContent = name;
         row.insertCell().textContent = dosage;
         row.insertCell().textContent = freq;
@@ -337,7 +404,7 @@
         document.getElementById('summaryDetails').innerHTML = summaryHTML;
         document.getElementById('summaryModal').style.display = 'flex';
     }
-    
+
     function submitToGoogleForm() {
         if (!validateForm()) {
             showNotification("Please correct the errors before submitting.");
@@ -346,7 +413,7 @@
 
         const { patientDetails, medicationList } = getFormDataAsObject();
         const medicationText = medicationList.map(med => `${med.name}~${med.dosage}~${med.freq}`).join("|");
-        
+
         const formData = new FormData();
         formData.append(FORM_ENTRIES.patientName, patientDetails.name);
         formData.append(FORM_ENTRIES.patientEmail, patientDetails.email);
@@ -365,7 +432,7 @@
             console.error('Error:', error);
             showNotification('An error occurred while submitting. Please try again.');
         });
-        
+
         document.getElementById('summaryModal').style.display = 'none';
         const ref = generateReferenceNumber();
         document.getElementById('formContainer').innerHTML = `
@@ -401,7 +468,7 @@
                 clearError(id);
             }
         }
-        
+
         if (document.getElementById('medicationList').rows.length === 0) {
             isValid = false;
             showError('medication', "Please add at least one medication to the list.");
@@ -421,7 +488,7 @@
         const errorDiv = document.getElementById(`${id}-error`);
         if (errorDiv) errorDiv.textContent = '';
     }
-    
+
     function printSummary() {
         const { patientDetails, medicationList } = getFormDataAsObject();
         const printWindow = window.open('', '_blank');
