@@ -90,6 +90,9 @@
         .info-box { background-color: #f8f9fa; border-left: 4px solid var(--primary-blue); padding: 1rem; margin-bottom: 2rem; font-size: 0.9em; }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: white; padding: 30px; border-radius: 8px; max-width: 700px; width: 90%; max-height: 80vh; overflow-y: auto; }
+        .modal-buttons { margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px; }
+        .modal-buttons button.btn-confirm { background-color: var(--primary-green); }
+        .modal-buttons button.btn-cancel { background-color: var(--danger-red); }
         .success-message { text-align: center; padding: 40px; border: 2px solid var(--primary-green); border-radius: 8px; background: #e9f5e9; }
         .mobile-menu-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--primary-blue); z-index: 1001;
@@ -105,7 +108,7 @@
         @media (max-width: 768px) {
             .site-header h1 { font-size: 1.5rem; }
             .mobile-menu-icon { display: block; }
-            .sidebar { display: none; }
+            #desktop-sidebar { display: none; }
             .main-wrapper { flex-direction: column; max-width: 100%; margin: 0; }
             .form-content { margin-left: 0; border-radius: 0; box-shadow: none; padding: 1.5rem; }
             .add-med-group { grid-template-columns: 1fr; }
@@ -185,8 +188,8 @@
             <h3>Confirm Your Request</h3>
             <div id="summaryDetails"></div>
             <div class="modal-buttons">
-                <button onclick="submitToGoogleForm()" style="background-color: var(--primary-green);">Confirm & Submit</button>
-                <button onclick="document.getElementById('summaryModal').style.display='none'" style="background-color: var(--danger-red);">Cancel</button>
+                <button onclick="submitToGoogleForm()" class="btn-confirm">Confirm & Submit</button>
+                <button onclick="document.getElementById('summaryModal').style.display='none'" class="btn-cancel">Cancel</button>
             </div>
         </div>
     </div>
@@ -428,7 +431,7 @@
     }
     
     function generateReferenceNumber() {
-        const d = new Date();
+        const d = new new Date();
         const yyyymmdd = d.getFullYear() + ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2);
         const hhmmss = ('0' + d.getHours()).slice(-2) + ('0' + d.getMinutes()).slice(-2) + ('0' + d.getSeconds()).slice(-2);
         return `CHC-${yyyymmdd}-${hhmmss}`;
@@ -443,7 +446,7 @@
         const desktopNotification = document.getElementById('desktop-notification-area');
         const mobileNotification = document.getElementById('mobile-notification-area');
         desktopNotification.textContent = mobileNotification.textContent = message;
-        desktopNotification.style.display = mobileNotification.style.display = 'block';
+        desktopNotification.style.display = 'block';
         if (notificationTimeout) clearTimeout(notificationTimeout);
         notificationTimeout = setTimeout(() => {
             desktopNotification.style.display = mobileNotification.style.display = 'none';
