@@ -23,50 +23,82 @@ const FOOTER = `<p style="font-size:0.9em; color:#666;"><i>Please note: This is 
  * Creates a custom menu in the Google Sheet UI when the spreadsheet is opened.
  */
 function onOpen() {
-  SpreadsheetApp.getUi()
-      .createMenu('Surgery Tools')
-      .addItem('Send Patient Notification', 'sendDynamicNotification')
-      .addToUi();
+  const ui = SpreadsheetApp.getUi();
+  const menu = ui.createMenu('Surgery Tools');
+
+  menu.addItem('Send Patient Notification', 'sendDynamicNotification');
+  menu.addSeparator();
+
+  const statusMenu = ui.createMenu('Set Status');
+  statusMenu.addItem("Mark as 'Sent to Pharmacy'", 'setStatusReady');
+  statusMenu.addItem("Mark as 'Query'", 'setStatusQuery');
+
+  menu.addSubMenu(statusMenu);
+  menu.addToUi();
+}
+
+/**
+ * Sets the status of the selected row(s) to 'Sent to Pharmacy'.
+ */
+function setStatusReady() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const range = sheet.getActiveRange();
+  if (range.getRow() < 2) {
+    SpreadsheetApp.getUi().alert("Please select one or more patient rows first (row 2 or below).");
+    return;
+  }
+  range.getSheet().getRange(range.getRow(), STATUS_COL, range.getNumRows(), 1).setValue(STATUS_READY);
+}
+
+/**
+ * Sets the status of the selected row(s) to 'Query - Please Contact Us'.
+ */
+function setStatusQuery() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const range = sheet.getActiveRange();
+  if (range.getRow() < 2) {
+    SpreadsheetApp.getUi().alert("Please select one or more patient rows first (row 2 or below).");
+    return;
+  }
+  range.getSheet().getRange(range.getRow(), STATUS_COL, range.getNumRows(), 1).setValue(STATUS_QUERY);
 }
 
 /**
  * Runs when a cell is edited. Handles automated status-change notifications.
  */
 function onEdit(e) {
-  const range = e.range;
-  const sheet = range.getSheet();
-  const row = range.getRow();
+  try {
+    const range = e.range;
+    const sheet = range.getSheet();
+    const row = range.getRow();
 
-  // Exit if the sheet is not the target sheet, or the edited column isn't STATUS_COL, or it's the header row
-  if (sheet.getName() !== SHEET_NAME || range.getColumn() !== STATUS_COL || row < 2) {
-    return;
-  }
+    // Exit if the sheet is not the target sheet, or the edited column isn't STATUS_COL, or it's the header row
+    if (sheet.getName() !== SHEET_NAME || range.getColumn() !== STATUS_COL || row < 2) {
+      return;
+    }
 
-  const status = range.getValue().toString().trim();
-  const patientEmail = sheet.getRange(row, EMAIL_COL).getValue();
-  const patientName = sheet.getRange(row, NAME_COL).getValue();
+    const status = range.getValue().toString().trim();
+    const patientEmail = sheet.getRange(row, EMAIL_COL).getValue();
+    const patientName = sheet.getRange(row, NAME_COL).getValue();
 
-  if (status === STATUS_QUERY) {
-    if (!patientEmail) return; // Exit if no email for a query status
-    try {
+    if (status === STATUS_QUERY) {
+      if (!patientEmail) return; // Exit if no email for a query status
       const subject = "Action Required: Query Regarding Your Prescription Request";
       const body = `<p>Dear ${patientName},</p><p>Regarding your prescription request, we have a query that needs to be resolved.</p><p>Please contact the surgery by phone at <strong>${YOUR_PHONE_NUMBER}</strong>.</p><p>Thank you,</p><p><strong>${SENDER_NAME}</strong></p><hr>${FOOTER}`;
       MailApp.sendEmail({ to: patientEmail, subject: subject, htmlBody: body, name: SENDER_NAME });
-    } catch (err) {
-      Logger.log(`Error sending QUERY email for row ${row}: ${err.toString()}`);
-    }
 
-  } else if (status === STATUS_READY) {
-    const commPref = sheet.getRange(row, COMM_PREF_COL).getValue().toLowerCase();
+    } else if (status === STATUS_READY) {
+      const commPref = sheet.getRange(row, COMM_PREF_COL).getValue().toLowerCase();
 
-    if (commPref === 'whatsapp') {
-      // Since scripts can't open client-side links on an edit trigger,
-      // email the pre-filled WhatsApp link to the staff member who made the change.
-      const staffEmail = e.user.getEmail();
-      sendWhatsAppLinkToStaff(row, staffEmail);
-    } else { // Default to Email
-      sendReadyEmail(row);
+      if (commPref === 'whatsapp') {
+        const staffEmail = e.user.getEmail();
+        sendWhatsAppLinkToStaff(row, staffEmail);
+      } else { // Default to Email
+        sendReadyEmail(row);
+      }
     }
+  } catch (err) {
+    reportError('onEdit', err, e.range ? e.range.getRow() : null);
   }
 }
 
@@ -79,31 +111,44 @@ function onEdit(e) {
  * and 'On form submit' as the event type.
  */
 function onFormSubmit(e) {
-  const range = e.range;
-  const sheet = range.getSheet();
-  const row = range.getRow();
+  try {
+    const range = e.range;
+    const sheet = range.getSheet();
+    const row = range.getRow();
 
-  // --- Send initial confirmation email ---
-  const patientName = e.values[NAME_COL - 1];
-  const patientEmail = e.values[EMAIL_COL - 1];
-  const commPref = e.values[COMM_PREF_COL - 1];
-  sendConfirmationNotification(patientName, patientEmail, commPref);
+    // --- Back-End Validation ---
+    const patientName = e.values[NAME_COL - 1];
+    const patientEmail = e.values[EMAIL_COL - 1];
+    if (!patientName || !patientEmail) {
+      let message = `A new prescription request was submitted in row ${row} but was missing essential information.`;
+      if (!patientName) message += "\n- Patient Name is missing.";
+      if (!patientEmail) message += "\n- Patient Email is missing.";
+      MailApp.sendEmail(ADMIN_EMAIL, "Prescription Request Validation Error", message);
+      return; // Stop processing
+    }
 
-  // --- Format medication list ---
-  const medicationsRaw = e.values[MEDS_COL - 1];
-  if (typeof medicationsRaw === 'string' && medicationsRaw.includes("~")) {
-    let medListSheet = [];
-    const meds = medicationsRaw.split("|");
-    meds.forEach(med => {
-      const details = med.split("~");
-      medListSheet.push(`${details[0] || ''} - ${details[1] || ''} (${details[2] || ''})`);
-    });
-    sheet.getRange(row, MEDS_COL).setValue(medListSheet.join("\n"));
+    // --- Send initial confirmation email ---
+    const commPref = e.values[COMM_PREF_COL - 1];
+    sendConfirmationNotification(patientName, patientEmail, commPref);
+
+    // --- Format medication list ---
+    const medicationsRaw = e.values[MEDS_COL - 1];
+    if (typeof medicationsRaw === 'string' && medicationsRaw.includes("~")) {
+      let medListSheet = [];
+      const meds = medicationsRaw.split("|");
+      meds.forEach(med => {
+        const details = med.split("~");
+        medListSheet.push(`${details[0] || ''} - ${details[1] || ''} (${details[2] || ''})`);
+      });
+      sheet.getRange(row, MEDS_COL).setValue(medListSheet.join("\n"));
+    }
+
+    // It's recommended to rename the 'Notification Sent' column to 'Row Processed At'.
+    const timestamp = new Date().toLocaleString('en-IE', { timeZone: 'Europe/Dublin' });
+    sheet.getRange(row, NOTIFICATION_COL).setValue("Processed at " + timestamp);
+  } catch (err) {
+    reportError('onFormSubmit', err, e.range ? e.range.getRow() : null);
   }
-
-  // It's recommended to rename the 'Notification Sent' column to 'Row Processed At'.
-  const timestamp = new Date().toLocaleString('en-IE', { timeZone: 'Europe/Dublin' });
-  sheet.getRange(row, NOTIFICATION_COL).setValue("Processed at " + timestamp);
 }
 
 // --- MANUAL NOTIFICATION FUNCTIONS (from 'Surgery Tools' menu) ---
@@ -314,5 +359,82 @@ function sendWhatsAppLinkToStaff(row, staffEmail) {
     MailApp.sendEmail({ to: staffEmail, subject: subject, htmlBody: body });
   } catch (e) {
     Logger.log(`Error sending WhatsApp link to staff for row ${row}: ${e.toString()}`);
+  }
+}
+
+/**
+ * Emails a detailed error report to the admin.
+ * @param {string} functionName - The name of the function where the error occurred.
+ * @param {Error} error - The error object.
+ * @param {number} [row] - The row number associated with the error, if applicable.
+ */
+function reportError(functionName, error, row) {
+  try {
+    const subject = `Prescription Script Error: ${functionName}`;
+    let body = `An error occurred in the function <strong>${functionName}</strong> at ${new Date().toLocaleString('en-IE', { timeZone: 'Europe/Dublin' })}.`;
+    if (row) {
+      body += `<br><br>The error was related to row <strong>${row}</strong>.`;
+    }
+    body += `<br><br><strong>Error Details:</strong><br>Name: ${error.name}<br>Message: ${error.message}<br>Stack Trace:<br>${error.stack.replace(/\n/g, '<br>')}`;
+    MailApp.sendEmail(ADMIN_EMAIL, subject, "", { htmlBody: body });
+  } catch (e) {
+    Logger.log(`Could not send error report email. Original error in ${functionName}: ${error.message}. Error sending report: ${e.message}`);
+  }
+}
+
+/**
+ * Moves rows with a 'Sent to Pharmacy' status older than 180 days to an 'Archive' sheet.
+ * This function should be run on a time-based trigger (e.g., weekly).
+ *
+ * TO SET UP:
+ * 1. Create a new sheet in your spreadsheet named "Archive".
+ * 2. In the Apps Script editor, go to Triggers > Add Trigger.
+ *    - Choose 'archiveOldRequests' as the function to run.
+ *    - Choose 'Time-driven' as the event source.
+ *    - Select 'Week timer' and a time that suits you (e.g., 'Every Monday', '1am to 2am').
+ */
+function archiveOldRequests() {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sourceSheet = ss.getSheetByName(SHEET_NAME);
+    let archiveSheet = ss.getSheetByName("Archive");
+
+    // Create archive sheet if it doesn't exist
+    if (!archiveSheet) {
+      archiveSheet = ss.insertSheet("Archive");
+      // Copy headers to the archive sheet
+      sourceSheet.getRange(1, 1, 1, sourceSheet.getLastColumn()).copyTo(archiveSheet.getRange(1, 1));
+      Logger.log("Created 'Archive' sheet.");
+    }
+
+    const dataRange = sourceSheet.getRange(2, 1, sourceSheet.getLastRow() - 1, sourceSheet.getLastColumn());
+    const data = dataRange.getValues();
+    const today = new Date();
+    const cutOffDate = new Date(today.setDate(today.getDate() - 180));
+
+    // Iterate backwards to safely delete rows
+    for (let i = data.length - 1; i >= 0; i--) {
+      const rowData = data[i];
+      const status = rowData[STATUS_COL - 1];
+      const processedDateStr = rowData[NOTIFICATION_COL - 1]; // "Processed at 14/09/2025, 16:16:04"
+
+      if (status === STATUS_READY && processedDateStr) {
+        // Attempt to parse the date from the string. This is brittle and depends on the locale format.
+        // A more robust solution would store dates in a standard format or as a Date object directly.
+        const dateParts = processedDateStr.replace("Processed at ", "").split(',')[0].split('/');
+        if (dateParts.length === 3) {
+          // Format is likely DD/MM/YYYY
+          const processedDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
+          if (processedDate < cutOffDate) {
+            const rowToDelete = i + 2; // +2 because data is 0-indexed and sheet is 1-indexed from row 2
+            archiveSheet.appendRow(rowData);
+            sourceSheet.deleteRow(rowToDelete);
+            Logger.log(`Archived row ${rowToDelete}.`);
+          }
+        }
+      }
+    }
+  } catch (err) {
+    reportError('archiveOldRequests', err, null);
   }
 }
