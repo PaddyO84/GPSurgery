@@ -115,19 +115,31 @@ function onFormSubmit(e) {
     const sheet = range.getSheet();
     const row = range.getRow();
 
+    // --- Send Confirmation First ---
+    // It's important to confirm receipt to the patient immediately, even if validation fails later.
     const patientName = e.values[NAME_COL - 1];
     const patientEmail = e.values[EMAIL_COL - 1];
+    const commPref = e.values[COMM_PREF_COL - 1];
+
+    // We can proceed with confirmation even if email is missing; the function handles it.
+    sendConfirmationNotification(patientName, patientEmail, commPref);
+
+    // --- Back-end Validation ---
+    // Now, validate the data. If it fails, report to admin but don't stop processing.
+    // The patient has already been notified that we received the request.
     if (!patientName || !patientEmail) {
-      let message = `A new prescription request was submitted in row ${row} but was missing essential information.`;
-      if (!patientName) message += "\n- Patient Name is missing.";
-      if (!patientEmail) message += "\n- Patient Email is missing.";
-      MailApp.sendEmail(ADMIN_EMAIL, "Prescription Request Validation Error", message);
+      let errorMessage = `A new prescription request was submitted in row ${row} but was missing essential information. The patient has been sent a confirmation, but please review the submission manually.`;
+      if (!patientName) errorMessage += "\n- Patient Name is missing.";
+      if (!patientEmail) errorMessage += "\n- Patient Email is missing.";
+
+      // Use the robust reportError function instead of a simple MailApp.sendEmail
+      reportError('onFormSubmit Validation', new Error(errorMessage), row);
+
+      // We can exit here as further processing (like medication formatting) is not possible.
       return;
     }
 
-    const commPref = e.values[COMM_PREF_COL - 1];
-    sendConfirmationNotification(patientName, patientEmail, commPref);
-
+    // --- Process Valid Data ---
     const medicationsRaw = e.values[MEDS_COL - 1];
     if (typeof medicationsRaw === 'string' && medicationsRaw.includes("~")) {
       let medListSheet = [];
@@ -393,83 +405,6 @@ function sendWhatsAppLinkToStaff(row, staffEmail) {
     MailApp.sendEmail({ to: staffEmail, subject: subject, htmlBody: body });
   } catch (e) {
     Logger.log(`Error sending WhatsApp link to staff for row ${row}: ${e.toString()}`);
-  }
-}
-
-/**
- * Emails a detailed error report to the admin.
- * @param {string} functionName - The name of the function where the error occurred.
- * @param {Error} error - The error object.
- * @param {number} [row] - The row number associated with the error, if applicable.
- */
-function reportError(functionName, error, row) {
-  try {
-    const subject = `Prescription Script Error: ${functionName}`;
-    let body = `An error occurred in the function <strong>${functionName}</strong> at ${new Date().toLocaleString('en-IE', { timeZone: 'Europe/Dublin' })}.`;
-    if (row) {
-      body += `<br><br>The error was related to row <strong>${row}</strong>.`;
-    }
-    body += `<br><br><strong>Error Details:</strong><br>Name: ${error.name}<br>Message: ${error.message}<br>Stack Trace:<br>${error.stack.replace(/\n/g, '<br>')}`;
-    MailApp.sendEmail(ADMIN_EMAIL, subject, "", { htmlBody: body });
-  } catch (e) {
-    Logger.log(`Could not send error report email. Original error in ${functionName}: ${error.message}. Error sending report: ${e.message}`);
-  }
-}
-
-/**
- * Moves rows with a 'Sent to Pharmacy' status older than 180 days to an 'Archive' sheet.
- * This function should be run on a time-based trigger (e.g., weekly).
- *
- * TO SET UP:
- * 1. Create a new sheet in your spreadsheet named "Archive".
- * 2. In the Apps Script editor, go to Triggers > Add Trigger.
- *    - Choose 'archiveOldRequests' as the function to run.
- *    - Choose 'Time-driven' as the event source.
- *    - Select 'Week timer' and a time that suits you (e.g., 'Every Monday', '1am to 2am').
- */
-function archiveOldRequests() {
-  try {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const sourceSheet = ss.getSheetByName(SHEET_NAME);
-    let archiveSheet = ss.getSheetByName("Archive");
-
-    // Create archive sheet if it doesn't exist
-    if (!archiveSheet) {
-      archiveSheet = ss.insertSheet("Archive");
-      // Copy headers to the archive sheet
-      sourceSheet.getRange(1, 1, 1, sourceSheet.getLastColumn()).copyTo(archiveSheet.getRange(1, 1));
-      Logger.log("Created 'Archive' sheet.");
-    }
-
-    const dataRange = sourceSheet.getRange(2, 1, sourceSheet.getLastRow() - 1, sourceSheet.getLastColumn());
-    const data = dataRange.getValues();
-    const today = new Date();
-    const cutOffDate = new Date(today.setDate(today.getDate() - 180));
-
-    // Iterate backwards to safely delete rows
-    for (let i = data.length - 1; i >= 0; i--) {
-      const rowData = data[i];
-      const status = rowData[STATUS_COL - 1];
-      const processedDateStr = rowData[NOTIFICATION_COL - 1]; // "Processed at 14/09/2025, 16:16:04"
-
-      if (status === STATUS_READY && processedDateStr) {
-        // Attempt to parse the date from the string. This is brittle and depends on the locale format.
-        // A more robust solution would store dates in a standard format or as a Date object directly.
-        const dateParts = processedDateStr.replace("Processed at ", "").split(',')[0].split('/');
-        if (dateParts.length === 3) {
-          // Format is likely DD/MM/YYYY
-          const processedDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
-          if (processedDate < cutOffDate) {
-            const rowToDelete = i + 2; // +2 because data is 0-indexed and sheet is 1-indexed from row 2
-            archiveSheet.appendRow(rowData);
-            sourceSheet.deleteRow(rowToDelete);
-            Logger.log(`Archived row ${rowToDelete}.`);
-          }
-        }
-      }
-    }
-  } catch (err) {
-    reportError('archiveOldRequests', err, null);
   }
 }
 

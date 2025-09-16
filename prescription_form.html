@@ -194,8 +194,8 @@
         <button class="mobile-menu-close" onclick="toggleMobileMenu(false)">&times;</button>
         <div class="sidebar">
             <h3>Actions</h3>
-            <button type="button" onclick="document.getElementById('loadFile').click(); toggleMobileMenu(false);">Load Request</button>
-            <button type="button" onclick="saveRequestToFile(); toggleMobileMenu(false);">Save Request</button>
+            <button type="button" title="Load a previously saved prescription list from a file on your device." onclick="document.getElementById('loadFile').click(); toggleMobileMenu(false);">Load My Prescriptions</button>
+            <button type="button" title="Save your current prescription list to a file on your device." onclick="saveRequestToFile(); toggleMobileMenu(false);">Save My Prescriptions</button>
             <button type="button" class="print-btn" onclick="printSummary(); toggleMobileMenu(false);">Print Summary</button>
             <button type="button" class="clear-btn" onclick="clearAllFields(); toggleMobileMenu(false);">Clear All Fields</button>
             <div class="notification" id="mobile-notification-area"></div>
@@ -205,8 +205,8 @@
     <div class="main-wrapper">
         <div class="sidebar" id="desktop-sidebar">
             <h3>Actions</h3>
-            <button type="button" onclick="document.getElementById('loadFile').click()">Load Request</button>
-            <button type="button" onclick="saveRequestToFile()">Save Request</button>
+            <button type="button" title="Load a previously saved prescription list from a file on your device." onclick="document.getElementById('loadFile').click()">Load My Prescriptions</button>
+            <button type="button" title="Save your current prescription list to a file on your device." onclick="saveRequestToFile()">Save My Prescriptions</button>
             <button type="button" class="print-btn" onclick="printSummary()">Print Summary</button>
             <button type="button" class="clear-btn" onclick="clearAllFields()">Clear Form</button>
             <input type="file" id="loadFile" onchange="loadRequestFromFile(event)" accept=".json">
