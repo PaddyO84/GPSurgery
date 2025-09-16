@@ -151,8 +151,9 @@ function onFormSubmit(e) {
       sheet.getRange(row, MEDS_COL).setValue(medListSheet.join("\n"));
     }
 
-    const timestamp = new Date().toLocaleString('en-IE', { timeZone: 'Europe/Dublin' });
-    sheet.getRange(row, NOTIFICATION_COL).setValue("Processed at " + timestamp);
+    // Use Utilities.formatDate for a robust, non-locale-dependent date string.
+    const timestamp = Utilities.formatDate(new Date(), "Europe/Dublin", "dd/MM/yyyy");
+    sheet.getRange(row, NOTIFICATION_COL).setValue("Processed on " + timestamp);
   } catch (err) {
     reportError('onFormSubmit', err, e.range ? e.range.getRow() : null);
   }
@@ -417,7 +418,8 @@ function sendWhatsAppLinkToStaff(row, staffEmail) {
 function reportError(functionName, error, row) {
   try {
     const subject = `Prescription Script Error: ${functionName}`;
-    let body = `An error occurred in the function <strong>${functionName}</strong> at ${new Date().toLocaleString('en-IE', { timeZone: 'Europe/Dublin' })}.`;
+    const timestamp = Utilities.formatDate(new Date(), "Europe/Dublin", "dd/MM/yyyy HH:mm:ss");
+    let body = `An error occurred in the function <strong>${functionName}</strong> at ${timestamp}.`;
     if (row) {
       body += `<br><br>The error was related to row <strong>${row}</strong>.`;
     }
@@ -462,15 +464,16 @@ function archiveOldRequests() {
     for (let i = data.length - 1; i >= 0; i--) {
       const rowData = data[i];
       const status = rowData[STATUS_COL - 1];
-      const processedDateStr = rowData[NOTIFICATION_COL - 1]; // "Processed at 14/09/2025, 16:16:04"
+      const processedDateStr = rowData[NOTIFICATION_COL - 1]; // Expected format: "Processed on dd/MM/yyyy"
 
-      if (status === STATUS_READY && processedDateStr) {
-        // Attempt to parse the date from the string. This is brittle and depends on the locale format.
-        // A more robust solution would store dates in a standard format or as a Date object directly.
-        const dateParts = processedDateStr.replace("Processed at ", "").split(',')[0].split('/');
+      if (status === STATUS_READY && processedDateStr && processedDateStr.startsWith("Processed on ")) {
+        const dateStr = processedDateStr.replace("Processed on ", ""); // "dd/MM/yyyy"
+        const dateParts = dateStr.split('/'); // ["dd", "MM", "yyyy"]
+
         if (dateParts.length === 3) {
-          // Format is likely DD/MM/YYYY
-          const processedDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
+          // new Date(year, monthIndex, day)
+          const processedDate = new Date(parseInt(dateParts[2], 10), parseInt(dateParts[1], 10) - 1, parseInt(dateParts[0], 10));
+
           if (processedDate < cutOffDate) {
             const rowToDelete = i + 2; // +2 because data is 0-indexed and sheet is 1-indexed from row 2
             archiveSheet.appendRow(rowData);
