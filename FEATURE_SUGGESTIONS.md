@@ -12,12 +12,7 @@ This document outlines potential new features to enhance the prescription reques
 *   **Benefits:** Patients can easily track their past requests without needing to contact the surgery. This also provides a clear record for them.
 *   **Implementation:** This would involve creating a unique, persistent identifier for each patient and storing their submission history in a structured way within the Google Sheet.
 
-### 2. Simple Secure Messaging
-*   **Concept:** A dedicated form on the website where a logged-in or identified patient can send a non-urgent message directly to the clinic staff.
-*   **Benefits:** Provides a more formal and trackable communication channel than standard email. It keeps patient queries organized in one place.
-*   **Implementation:** The message could be sent as a formatted email to the admin or stored in a new "Messages" sheet in the Google Spreadsheet for staff to review.
-
-### 3. Online Patient Registration
+### 2. Online Patient Registration
 *   **Concept:** A form for new patients to submit their demographic and medical card information online.
 *   **Benefits:** Reduces paperwork and manual data entry for staff during a new patient's first visit.
 *   **Implementation:** This would create a new "Patients" sheet in the spreadsheet, effectively creating a simple patient database that can be referenced by other functions.
