@@ -1,0 +1,26 @@
+<div style="font-family:sans-serif;">
+  <h3>Reply to <?= safePatientName ?> (<?= safeMessageId ?>)</h3>
+  <h4>History:</h4>
+  <div style="background-color:#f5f5f5;padding:8px;border-radius:4px;max-height:150px;overflow-y:auto;white-space:pre-wrap;"><?= safeHistory.trim() || "No history." ?></div>
+  <label for="replyText"><b>Your Reply:</b></label>
+  <textarea id="replyText" style="width:95%;height:100px;"></textarea>
+  <br/><br/>
+  <button onclick="sendReply()">Send</button>
+  <button onclick="google.script.host.close()">Cancel</button>
+</div>
+<script>
+function sendReply() {
+  const text = document.getElementById("replyText").value;
+  if (!text.trim()) {
+    return void alert("Reply cannot be empty.");
+  }
+  document.querySelector("button").disabled = true;
+  google.script.run
+    .withSuccessHandler(google.script.host.close)
+    .withFailureHandler((e) => {
+      alert("Failed: " + e.message);
+      google.script.host.close();
+    })
+    .sendReplyFromSheet("<?= messageId ?>", text); // Note: messageId is raw here
+}
+</script>
