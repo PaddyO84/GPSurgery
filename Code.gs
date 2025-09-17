@@ -17,8 +17,22 @@ const CONFIG = {
   },
   SENDER_NAME: "Carndonagh Health Centre",
   ADMIN_EMAIL: "patricknoone+surgery@gmail.com",
-  STATUS_QUERY: "Query - Please Contact Us",
-  STATUS_READY: "Sent to Pharmacy",
+  STATUSES: {
+    // Prescription Statuses
+    QUERY: "Query - Please Contact Us",
+    READY: "Sent to Pharmacy",
+    // Message Statuses
+    NEW: "New",
+    REPLIED: "Replied",
+    PATIENT_REPLIED: "Patient Replied",
+    CLOSED: "Closed",
+    // Communication Preferences
+    COMM_WHATSAPP: "whatsapp",
+    COMM_EMAIL: "Email",
+    // Misc
+    PROCESSED_PREFIX: "Processed on "
+  },
+  DATE_FORMAT: "yyyy-MM-dd",
   FOOTER: `<p style="font-size:0.9em; color:#666;"><i>Please note: This is an automated message and this email address is not monitored. For any queries, please contact the surgery by phone.</i></p>`
 };
 
@@ -33,8 +47,8 @@ function onOpen() {
   const prescriptionMenu = ui.createMenu('Prescriptions');
   prescriptionMenu.addItem('Send Patient Notification', 'sendPrescriptionNotification');
   prescriptionMenu.addSeparator();
-  prescriptionMenu.addItem(`Mark as '${CONFIG.STATUS_READY}'`, 'setPrescriptionStatusReady');
-  prescriptionMenu.addItem(`Mark as '${CONFIG.STATUS_QUERY}'`, 'setPrescriptionStatusQuery');
+  prescriptionMenu.addItem(`Mark as '${CONFIG.STATUSES.READY}'`, 'setPrescriptionStatusReady');
+  prescriptionMenu.addItem(`Mark as '${CONFIG.STATUSES.QUERY}'`, 'setPrescriptionStatusQuery');
   menu.addSubMenu(prescriptionMenu);
   const messagingMenu = ui.createMenu('Messaging');
   messagingMenu.addItem('Reply to Message', 'showMessageReplyDialog');
@@ -81,14 +95,14 @@ function onEdit(e) {
     const sheet = range.getSheet();
     if (sheet.getName() !== CONFIG.SHEETS.PRESCRIPTIONS || !CONFIG.COLUMN_MAP.PRESCRIPTIONS || range.getColumn() !== CONFIG.COLUMN_MAP.PRESCRIPTIONS.STATUS || range.getRow() < 2) return;
     const status = range.getValue().toString().trim();
-    if (status === CONFIG.STATUS_READY) {
+    if (status === CONFIG.STATUSES.READY) {
       const commPref = sheet.getRange(range.getRow(), CONFIG.COLUMN_MAP.PRESCRIPTIONS.COMMUNICATION_PREFERENCE).getValue().toLowerCase();
-      if (commPref === 'whatsapp') {
+      if (commPref === CONFIG.STATUSES.COMM_WHATSAPP) {
         sendWhatsAppLinkToStaff(range.getRow());
       } else {
         sendReadyEmail(range.getRow());
       }
-    } else if (status === CONFIG.STATUS_QUERY) {
+    } else if (status === CONFIG.STATUSES.QUERY) {
       sendQueryEmail(range.getRow());
     }
   } catch (err) {
@@ -98,27 +112,63 @@ function onEdit(e) {
 
 function onFormSubmit(e) {
   try {
-    const sheet = e.range.getSheet();
-    const row = e.range.getRow();
-    const patientName = e.values[CONFIG.FORM_SUBMIT_INDICES.NAME];
-    const patientEmail = e.values[CONFIG.FORM_SUBMIT_INDICES.EMAIL];
-    sendConfirmationNotification(patientName, patientEmail, e.values[CONFIG.FORM_SUBMIT_INDICES.COMM_PREF]);
-    if (!patientName || !patientEmail) {
-      reportError('onFormSubmit Validation', new Error(`Missing Name or Email in row ${row}.`), row);
-      return;
-    }
-    const medicationsRaw = e.values[CONFIG.FORM_SUBMIT_INDICES.MEDS];
-    if (typeof medicationsRaw === 'string' && medicationsRaw.includes("~")) {
-      const medList = medicationsRaw.split("|").map(med => {
-        const details = med.split("~");
-        return `${details[0] || ''} - ${details[1] || ''} (${details[2] || ''})`;
-      }).join("\n");
+    processPrescriptionSubmission(e);
+  } catch (err) {
+    // Catch any unexpected errors from the main logic
+    reportError('onFormSubmit Trigger', err, e.range ? e.range.getRow() : null);
+  }
+}
+
+/**
+ * Processes a new prescription request from a Google Form submission.
+ * @param {Object} e The form submission event object.
+ */
+function processPrescriptionSubmission(e) {
+  const sheet = e.range.getSheet();
+  const row = e.range.getRow();
+  const patientName = e.values[CONFIG.FORM_SUBMIT_INDICES.NAME];
+  const patientEmail = e.values[CONFIG.FORM_SUBMIT_INDICES.EMAIL];
+
+  // 1. Basic validation
+  if (!patientName || !patientEmail) {
+    reportError('processPrescriptionSubmission Validation', new Error(`Missing Name or Email in row ${row}.`), row);
+    return;
+  }
+
+  // 2. Send immediate confirmation to the patient
+  sendConfirmationNotification(patientName, patientEmail, e.values[CONFIG.FORM_SUBMIT_INDICES.COMM_PREF]);
+
+  // 3. Process and format the medication list if it exists
+  const medicationsRaw = e.values[CONFIG.FORM_SUBMIT_INDICES.MEDS];
+  if (medicationsRaw) {
+    const medList = parseMedicationString(medicationsRaw);
+    if (medList) {
       sheet.getRange(row, CONFIG.COLUMN_MAP.PRESCRIPTIONS.MEDICATION_REQUEST).setValue(medList);
     }
-    sheet.getRange(row, CONFIG.COLUMN_MAP.PRESCRIPTIONS.NOTIFICATION_SENT).setValue(`Processed on ${Utilities.formatDate(new Date(), "Europe/Dublin", "dd/MM/yyyy")}`);
-  } catch (err) {
-    reportError('onFormSubmit', err, e.range ? e.range.getRow() : null);
   }
+
+  // 4. Mark the submission as processed
+  sheet.getRange(row, CONFIG.COLUMN_MAP.PRESCRIPTIONS.NOTIFICATION_SENT).setValue(`${CONFIG.STATUSES.PROCESSED_PREFIX}${Utilities.formatDate(new Date(), "Europe/Dublin", CONFIG.DATE_FORMAT)}`);
+}
+
+/**
+ * Parses the special medication string from the form.
+ * The format is "MedicationName~Dosage~Quantity|MedicationName~Dosage~Quantity"
+ * @param {string} medicationsRaw The raw string from the form.
+ * @returns {string|null} A formatted string of medications or null if input is invalid.
+ */
+function parseMedicationString(medicationsRaw) {
+  if (typeof medicationsRaw !== 'string' || !medicationsRaw.includes("~")) {
+    return null;
+  }
+  return medicationsRaw.split("|").map(med => {
+    const details = med.split("~");
+    // Ensure all parts are defined, default to empty string if not
+    const medName = details[0] || '';
+    const dosage = details[1] || '';
+    const quantity = details[2] || '';
+    return `${medName} - ${dosage} (${quantity})`;
+  }).join("\n");
 }
 
 // --- 3. MESSAGING SYSTEM LOGIC & UI ---
@@ -127,7 +177,7 @@ function handleNewMessage(data) {
   const newRow = messagesSheet.getLastRow() + 1;
   const messageId = `MSG-${newRow}`;
   const timestamp = Utilities.formatDate(new Date(), "Europe/Dublin", "dd/MM/yyyy HH:mm:ss");
-  messagesSheet.appendRow([messageId, timestamp, data.patientName, data.dob, data.email, data.message, "", "New", timestamp]);
+  messagesSheet.appendRow([messageId, timestamp, data.patientName, data.dob, data.email, data.message, "", CONFIG.STATUSES.NEW, timestamp]);
   const subject = `New Patient Message [${messageId}] from ${data.patientName}`;
   const body = `<p>A new message has been submitted.</p><p><strong>From:</strong> ${escapeHtml(data.patientName)} (${escapeHtml(data.email)})</p><p><strong>DOB:</strong> ${escapeHtml(data.dob)}</p><hr><p><strong>Message:</strong></p><p style="white-space: pre-wrap;">${escapeHtml(data.message)}</p><hr><p>Logged in "Messages" sheet, row ${newRow}.</p>`;
   sendEmail(CONFIG.ADMIN_EMAIL, subject, body);
@@ -140,7 +190,7 @@ function handlePatientReply(data) {
   const timestamp = Utilities.formatDate(new Date(), "Europe/Dublin", "dd/MM/yyyy HH:mm:ss");
   const newHistoryEntry = `\n\n--- PATIENT REPLY on ${timestamp} ---\n${data.replyMessage}`;
   messagesSheet.getRange(rowNumber, CONFIG.COLUMN_MAP.MESSAGES.CONVERSATION_HISTORY).setValue(messagesSheet.getRange(rowNumber, CONFIG.COLUMN_MAP.MESSAGES.CONVERSATION_HISTORY).getValue() + newHistoryEntry);
-  messagesSheet.getRange(rowNumber, CONFIG.COLUMN_MAP.MESSAGES.STATUS).setValue("Patient Replied");
+  messagesSheet.getRange(rowNumber, CONFIG.COLUMN_MAP.MESSAGES.STATUS).setValue(CONFIG.STATUSES.PATIENT_REPLIED);
   messagesSheet.getRange(rowNumber, CONFIG.COLUMN_MAP.MESSAGES.LAST_UPDATED).setValue(timestamp);
   const patientName = messagesSheet.getRange(rowNumber, CONFIG.COLUMN_MAP.MESSAGES.PATIENT_NAME).getValue();
   const subject = `New Patient Reply [${data.messageId}] from ${patientName}`;
@@ -182,7 +232,7 @@ function sendReplyFromSheet(messageId, replyText) {
     const timestamp = Utilities.formatDate(new Date(), "Europe/Dublin", "dd/MM/yyyy HH:mm:ss");
     const newHistoryEntry = `\n\n--- STAFF REPLY on ${timestamp} ---\n${replyText}`;
     messagesSheet.getRange(rowNumber, CONFIG.COLUMN_MAP.MESSAGES.CONVERSATION_HISTORY).setValue(messagesSheet.getRange(rowNumber, CONFIG.COLUMN_MAP.MESSAGES.CONVERSATION_HISTORY).getValue() + newHistoryEntry);
-    messagesSheet.getRange(rowNumber, CONFIG.COLUMN_MAP.MESSAGES.STATUS).setValue("Replied");
+    messagesSheet.getRange(rowNumber, CONFIG.COLUMN_MAP.MESSAGES.STATUS).setValue(CONFIG.STATUSES.REPLIED);
     messagesSheet.getRange(rowNumber, CONFIG.COLUMN_MAP.MESSAGES.LAST_UPDATED).setValue(timestamp);
     const webAppUrl = ScriptApp.getService().getUrl();
     const replyLink = `${webAppUrl}?page=reply&id=${messageId}`;
@@ -202,7 +252,7 @@ function markMessageClosed() {
   const range = sheet.getActiveRange();
   if (range.getRow() < 2) { ui.alert("Please select one or more message rows first."); return; }
   const timestamp = Utilities.formatDate(new Date(), "Europe/Dublin", "dd/MM/yyyy HH:mm:ss");
-  sheet.getRange(range.getRow(), CONFIG.COLUMN_MAP.MESSAGES.STATUS, range.getNumRows(), 1).setValue("Closed");
+  sheet.getRange(range.getRow(), CONFIG.COLUMN_MAP.MESSAGES.STATUS, range.getNumRows(), 1).setValue(CONFIG.STATUSES.CLOSED);
   sheet.getRange(range.getRow(), CONFIG.COLUMN_MAP.MESSAGES.LAST_UPDATED, range.getNumRows(), 1).setValue(timestamp);
   ui.toast(`${range.getNumRows()} message(s) marked as Closed.`);
 }
@@ -259,8 +309,8 @@ function sendPrescriptionNotification() {
     }
   }
 }
-function setPrescriptionStatusReady() { setStatus(CONFIG.STATUS_READY); }
-function setPrescriptionStatusQuery() { setStatus(CONFIG.STATUS_QUERY); }
+function setPrescriptionStatusReady() { setStatus(CONFIG.STATUSES.READY); }
+function setPrescriptionStatusQuery() { setStatus(CONFIG.STATUSES.QUERY); }
 function setStatus(status) {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   if (sheet.getName() !== CONFIG.SHEETS.PRESCRIPTIONS) return void SpreadsheetApp.getUi().alert("This function is for the prescriptions sheet.");
@@ -274,7 +324,7 @@ function sendConfirmationNotification(patientName, patientEmail, commPref) {
         return;
     }
     const subject = "Confirmation: We've Received Your Prescription Request";
-    const commMethod = commPref && commPref.toLowerCase() === 'whatsapp' ? "WhatsApp" : "Email";
+    const commMethod = commPref && commPref.toLowerCase() === CONFIG.STATUSES.COMM_WHATSAPP ? "WhatsApp" : CONFIG.STATUSES.COMM_EMAIL;
     const body = `<p>Dear ${escapeHtml(patientName)},</p><p>Thank you for your repeat prescription request. This is to confirm we have received it.</p><p>You will receive a final notification by <strong>${commMethod}</strong> once your prescription has been sent to your chosen pharmacy.</p><p>Thank you,<br><strong>${CONFIG.SENDER_NAME}</strong></p><hr>${CONFIG.FOOTER}`;
     sendEmail(patientEmail, subject, body, { name: CONFIG.SENDER_NAME });
 }
@@ -327,14 +377,12 @@ function archiveOldRequests() {
         const rowData = data[i];
         const status = rowData[CONFIG.COLUMN_MAP.PRESCRIPTIONS.STATUS - 1];
         const notificationDateStr = rowData[CONFIG.COLUMN_MAP.PRESCRIPTIONS.NOTIFICATION_SENT - 1];
-        if (status === CONFIG.STATUS_READY && notificationDateStr && notificationDateStr.startsWith("Processed on ")) {
-            const dateParts = notificationDateStr.replace("Processed on ", "").split("/");
-            if (dateParts.length === 3) {
-                const notificationDate = new Date(parseInt(dateParts[2], 10), parseInt(dateParts[1], 10) - 1, parseInt(dateParts[0], 10));
-                if (notificationDate < cutoffDate) {
-                    archiveSheet.appendRow(rowData);
-                    sourceSheet.deleteRow(i + 2);
-                }
+        if (status === CONFIG.STATUSES.READY && notificationDateStr && notificationDateStr.startsWith(CONFIG.STATUSES.PROCESSED_PREFIX)) {
+            const dateStr = notificationDateStr.replace(CONFIG.STATUSES.PROCESSED_PREFIX, "").trim();
+            const notificationDate = new Date(dateStr);
+            if (!isNaN(notificationDate.getTime()) && notificationDate < cutoffDate) {
+                archiveSheet.appendRow(rowData);
+                sourceSheet.deleteRow(i + 2);
             }
         }
     }
@@ -366,15 +414,32 @@ function setupSheet(ss, sheetName, headers) {
         sheet.setFrozenRows(1);
     }
 }
+/**
+ * Finds the row number for a given message ID using the efficient TextFinder class.
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet The sheet to search in.
+ * @param {string} messageId The message ID to find.
+ * @returns {number} The row number (1-indexed) or -1 if not found.
+ */
 function findRowByMessageId(sheet, messageId) {
-    if (!CONFIG.COLUMN_MAP.MESSAGES) return -1; // Ensure map is initialized
-    const data = sheet.getRange(2, CONFIG.COLUMN_MAP.MESSAGES.MESSAGE_ID, sheet.getLastRow() > 1 ? sheet.getLastRow() - 1 : 1, 1).getValues();
-    for (let i = 0; i < data.length; i++) {
-        if (data[i][0] === messageId) {
-            return i + 2;
-        }
-    }
-    return -1;
+    if (!CONFIG.COLUMN_MAP.MESSAGES || !messageId) return -1; // Ensure map is initialized and messageId is provided
+
+    const messageIdColumn = CONFIG.COLUMN_MAP.MESSAGES.MESSAGE_ID;
+    const searchRange = sheet.getRange(2, messageIdColumn, sheet.getLastRow() - 1, 1);
+
+    const textFinder = searchRange.createTextFinder(messageId).matchEntireCell(true);
+    const foundCell = textFinder.findNext();
+
+    return foundCell ? foundCell.getRow() : -1;
+}
+
+/**
+ * Includes the content of another HTML file.
+ * This is used to separate CSS and JavaScript from the main HTML file.
+ * @param {string} filename The name of the file to include.
+ * @returns {string} The content of the file.
+ */
+function include(filename) {
+  return HtmlService.createHtmlOutputFromFile(filename).getContent();
 }
 
 function sendErrorReport(subject, body) {

@@ -1,0 +1,16 @@
+<script>
+function sendReply() {
+  const text = document.getElementById("replyText").value;
+  if (!text.trim()) {
+    return void alert("Reply cannot be empty.");
+  }
+  document.querySelector("button").disabled = true;
+  google.script.run
+    .withSuccessHandler(google.script.host.close)
+    .withFailureHandler((e) => {
+      alert("Failed: " + e.message);
+      google.script.host.close();
+    })
+    .sendReplyFromSheet("<?= messageId ?>", text); // Note: messageId is raw here
+}
+</script>
