@@ -1,19 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Repeat Prescription Request | Carndonagh Health Centre</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+        --primary-color: #0d47a1; /* Dark Blue from website */
+        --secondary-color: #1565c0; /* Lighter Blue */
+        --accent-color: #ff6f00; /* Orange accent */
+        --light-gray: #f5f5f5;
+        --dark-gray: #333;
+        --white: #ffffff;
+        --error-red: #d9534f;
+    }
+    body {
+        font-family: 'Open Sans', sans-serif;
+        margin: 0;
+        background-color: var(--light-gray);
+        display: flex;
+        min-height: 100vh;
+        color: var(--dark-gray);
+    }
+    .sidebar {
+        width: 260px;
+        background-color: var(--primary-color);
+        color: var(--white);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+    .main-content {
+        flex-grow: 1;
+        padding: 20px;
+        overflow-y: auto;
+    }
+    .form-section {
+        background: var(--white);
+        padding: 25px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    h1, h2 {
+        font-family: 'Roboto', sans-serif;
+        color: var(--primary-color);
+    }
+    h1 { font-size: 2em; text-align: center; margin-bottom: 30px; }
+    h2 { border-bottom: 2px solid var(--light-gray); padding-bottom: 10px; margin-top: 0; }
+    label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 8px;
+        font-size: 0.9em;
+    }
+    input[type="text"], input[type="email"], input[type="tel"], input[type="date"], textarea, select {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 1em;
+    }
+    button {
+        background-color: var(--secondary-color);
+        color: white;
+        padding: 12px 18px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1em;
+        transition: background-color 0.2s;
+    }
+    button:hover {
+        background-color: #1976d2; /* Darker shade of secondary */
+    }
+    .sidebar-btn {
+        background-color: var(--accent-color);
+        display: block;
+        width: 100%;
+        text-align: left;
+        margin-bottom: 10px;
+        position: relative;
+    }
+    .sidebar-btn:hover::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        left: 105%;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: var(--dark-gray);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 0.8em;
+        white-space: nowrap;
+        z-index: 10;
+    }
+    .remove-btn {
+        background-color: var(--error-red);
+        font-size: 0.8em;
+        padding: 6px 12px;
+    }
+    #medicationTable { width: 100%; border-collapse: collapse; }
+    #medicationTable th, #medicationTable td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+    #medicationTable th { background-color: var(--light-gray); }
+    #summaryModal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
+    .modal-content { background-color: #fefefe; margin: auto; padding: 30px; border: 1px solid #888; width: 90%; max-width: 600px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+    .success-message { text-align: center; padding: 40px; background-color: #e8f5e9; border: 1px solid #4caf50; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h2>Controls</h2>
+    <button class="sidebar-btn" onclick="document.getElementById('file-input').click();" data-tooltip="Load a previously saved prescription request from your computer.">Load My Prescriptions</button>
+    <input type="file" id="file-input" style="display:none" onchange="loadRequestFromFile(event)" accept=".json">
+    <button class="sidebar-btn" onclick="saveRequestToFile()" data-tooltip="Save the current prescription details to a file on your computer.">Save My Prescriptions</button>
+    <button class="sidebar-btn" onclick="clearAllFields()" data-tooltip="Clear all fields in the form.">Clear Form</button>
+    <button class="sidebar-btn" onclick="printSummary()" data-tooltip="Generate a printable summary of your request.">Print Summary</button>
+  </div>
+
+  <div class="main-content" id="formContainer">
+    <h1>Repeat Prescription Request</h1>
+
+    <div class="form-section" id="patientDetailsSection">
+      <h2>Patient Details</h2>
+      <label for="patientName">Full Name:</label>
+      <input type="text" id="patientName" name="patientName">
+      <label for="patientDOB">Date of Birth:</label>
+      <input type="date" id="patientDOB" name="patientDOB">
+      <label for="patientAddress">Address:</label>
+      <textarea id="patientAddress" name="patientAddress" rows="3"></textarea>
+      <label for="patientEmail">Email:</label>
+      <input type="email" id="patientEmail" name="patientEmail">
+      <label for="patientPhone">Phone Number:</label>
+      <input type="tel" id="patientPhone" name="patientPhone">
+      <label for="chosenPharmacy">Pharmacy:</label>
+      <select id="chosenPharmacy" name="chosenPharmacy"></select>
+      <label>Preferred Contact Method:</label>
+      <input type="radio" id="prefEmail" name="communicationPref" value="Email" checked>
+      <label for="prefEmail">Email</label>
+      <input type="radio" id="prefWhatsapp" name="communicationPref" value="WhatsApp">
+      <label for="prefWhatsapp">WhatsApp</label>
+    </div>
+
+    <div class="form-section">
+      <h2>Add Medication</h2>
+      <label for="medName">Medication Name:</label>
+      <input type="text" id="medName" list="medication-list">
+      <datalist id="medication-list"></datalist>
+      <label for="medDosage">Dosage (e.g., 40mg):</label>
+      <input type="text" id="medDosage">
+      <label for="medFreq">Frequency:</label>
+      <select id="medFreq"></select>
+      <button onclick="addMedication()">Add Medication</button>
+    </div>
+
+    <div class="form-section">
+      <h2>Current Prescription List</h2>
+      <table id="medicationTable">
+        <thead>
+          <tr><th>Name</th><th>Dosage</th><th>Frequency</th><th>Action</th></tr>
+        </thead>
+        <tbody id="medicationList">
+        </tbody>
+      </table>
+    </div>
+
+    <button onclick="showSummary()" style="width:100%; padding: 15px; font-size: 18px; background-color: var(--success-green);">Submit Request</button>
+  </div>
+
+  <div id="summaryModal">
+    <div class="modal-content">
+      <span onclick="document.getElementById('summaryModal').style.display='none'" style="float:right; cursor:pointer; font-size: 2em; line-height: 1;">&times;</span>
+      <h2>Confirm Your Request</h2>
+      <div id="summaryDetails"></div>
+      <button onclick="submitToGoogleForm()">Confirm and Submit</button>
+      <button onclick="document.getElementById('summaryModal').style.display='none'">Cancel</button>
+    </div>
+  </div>
+
 <script>
-    // --- FINAL CORRECT CONFIGURATION ---
-    const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSepUNc9-xIpDf_UaM3-OwFFRdZozUoZC3jHRCas0b-gc1NStg/formResponse"; 
-    const PATIENT_NAME_ENTRY = "entry.1775196617"; 
+    const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSepUNc9-xIpDf_UaM3-OwFFRdZozUoZC3jHRCas0b-gc1NStg/formResponse";
+    const PATIENT_NAME_ENTRY = "entry.1775196617";
     const PATIENT_EMAIL_ENTRY = "entry.2008110253";
     const PATIENT_DOB_ENTRY = "entry.1011602497";
     const PATIENT_ADDRESS_ENTRY = "entry.1572836613";
     const PATIENT_PHONE_NO = "entry.1516294764";
     const CHOSEN_PHARMACY_ENTRY = "entry.1118271783";
     const COMMUNICATION_PREF_ENTRY = "entry.274147264";
-    const MEDICATION_LIST_ENTRY = "entry.607030324"; 
+    const MEDICATION_LIST_ENTRY = "entry.607030324";
 
     const commonMedications = ["Atorvastatin", "Ramipril", "Amlodipine", "Lansoprazole", "Salbutamol", "Metformin", "Sertraline", "Colecalciferol", "Levothyroxine", "Aspirin", "Bisoprolol", "Paracetamol", "Ibuprofen"];
     const pharmacyOptions = { "Tierney's Healthwise Pharmacy, Buncrana": "Tierney's Healthwise Pharmacy, Buncrana", "Inish Pharmacy, Buncrana": "Inish Pharmacy, Buncrana", "Duffy's Pharmacy, Buncrana": "Duffy's Pharmacy, Buncrana", "Brennan's Pharmacy, Buncrana": "Brennan's Pharmacy, Buncrana", "Hannon's Pharmacy, Moville": "Hannon's Pharmacy, Moville", "Foyle Pharmacy, Moville": "Foyle Pharmacy, Moville", "Brennan's Pharmacy, Clonmany": "Brennan's Pharmacy, Clonmany", "Inish Pharmacy, Muff": "Inish Pharmacy, Muff", "Mullans Pharmacy, Carndonagh": "Mullans Pharmacy, Carndonagh", "Carn Pharmacy, Carndonagh": "Carn Pharmacy, Carndonagh", "McNeill's Pharmacy, Carndonagh": "McNeill's Pharmacy, Carndonagh", "Inish Pharmacy, Carndonagh": "Inish Pharmacy, Carndonagh" };
     const frequencyOptions = {"Once a day": "Once a day", "Twice a day": "Twice a day", "Three times a day": "Three times a day", "Four times a day": "Four times a day"};
-    
+
     document.addEventListener('DOMContentLoaded', () => {
         populateDatalist('medication-list', commonMedications);
         populateSelect('chosenPharmacy', pharmacyOptions);
@@ -44,7 +228,7 @@
             select.appendChild(optionElement);
         }
     }
-    
+
     function getFormDataAsObject() {
         return {
             patientDetails: {
@@ -52,7 +236,7 @@
                 dob: document.getElementById('patientDOB').value, address: document.getElementById('patientAddress').value, pharmacy: document.getElementById('chosenPharmacy').value,
                 commPref: document.querySelector('input[name="communicationPref"]:checked').value
             },
-            medicationList: Array.from(document.getElementById('medicationList').rows).map(row => ({ name: row.cells[0].innerText, dosage: row.cells[1].innerText, freq: row.cells[2].innerText }))
+            medicationList: Array.from(document.getElementById('medicationList').rows).map(row => ({ name: row.cells[0].textContent, dosage: row.cells[1].textContent, freq: row.cells[2].textContent }))
         };
     }
 
@@ -87,11 +271,19 @@
 
     function createMedicationRow(name, dosage, freq) {
         const row = document.getElementById('medicationList').insertRow();
-        row.innerHTML = `<td>${name}</td><td>${dosage}</td><td>${freq}</td><td><button class="remove-btn" onclick="removeMedication(this)">Remove</button></td>`;
+        row.insertCell(0).textContent = name;
+        row.insertCell(1).textContent = dosage;
+        row.insertCell(2).textContent = freq;
+        const actionCell = row.insertCell(3);
+        const removeButton = document.createElement('button');
+        removeButton.textContent = "Remove";
+        removeButton.className = "remove-btn";
+        removeButton.onclick = () => { removeMedication(row); };
+        actionCell.appendChild(removeButton);
     }
 
-    function removeMedication(button) {
-        button.closest('tr').remove();
+    function removeMedication(row) {
+        row.remove();
         saveToLocalStorage();
     }
 
@@ -99,21 +291,33 @@
         if (confirm("Are you sure you want to clear the entire form?")) {
             populateFormFromData({ patientDetails: {}, medicationList: [] });
             localStorage.removeItem('prescriptionFormData');
-            showNotification("Form cleared.");
         }
     }
 
     function showSummary() {
+        if (!validatePatientDetails()) return;
         const { patientDetails, medicationList } = getFormDataAsObject();
-        if (!patientDetails.name || !patientDetails.dob || !patientDetails.address || !patientDetails.email || !patientDetails.phone) { alert("Please fill in all Patient Details."); return; }
         if (medicationList.length === 0) { alert("Please add at least one medication."); return; }
         let summaryHTML = `<p><strong>Name:</strong> ${patientDetails.name}</p><p><strong>Email:</strong> ${patientDetails.email}</p><p><strong>Phone:</strong> ${patientDetails.phone}</p><p><strong>Date of Birth:</strong> ${patientDetails.dob}</p><p><strong>Pharmacy:</strong> ${patientDetails.pharmacy}</p><p><strong>Contact Preference:</strong> ${patientDetails.commPref}</p><hr><h3>Medications:</h3><ul>${medicationList.map(med => `<li>${med.name} - ${med.dosage} (${med.freq})</li>`).join('')}</ul>`;
         document.getElementById('summaryDetails').innerHTML = summaryHTML;
         document.getElementById('summaryModal').style.display = 'flex';
     }
 
+    function validatePatientDetails() {
+      const fields = ['patientName', 'patientDOB', 'patientAddress', 'patientEmail', 'patientPhone', 'chosenPharmacy'];
+      for (const id of fields) {
+        if (!document.getElementById(id).value) {
+          alert("Please fill in all Patient Details before proceeding.");
+          return false;
+        }
+      }
+      return true;
+    }
+
     function printSummary() {
+        if (!validatePatientDetails()) return;
         const { patientDetails, medicationList } = getFormDataAsObject();
+        if (medicationList.length === 0) { alert("Please add at least one medication."); return; }
         const printWindow = window.open('', '_blank');
         printWindow.document.write(`<html><head><title>Prescription Request Summary</title><style>body{font-family:sans-serif;} table{width:100%; border-collapse:collapse;} th,td{border:1px solid #ccc; padding:8px; text-align:left;}</style></head><body><h1>Prescription Request</h1><p><strong>Name:</strong> ${patientDetails.name}</p><p><strong>Date of Birth:</strong> ${patientDetails.dob}</p><p><strong>Pharmacy:</strong> ${patientDetails.pharmacy}</p><h3>Medications</h3><table><thead><tr><th>Name</th><th>Dosage</th><th>Frequency</th></tr></thead><tbody>${medicationList.map(med => `<tr><td>${med.name}</td><td>${med.dosage}</td><td>${med.freq}</td></tr>`).join('')}</tbody></table></body></html>`);
         printWindow.document.close();
@@ -121,75 +325,60 @@
     }
     
     function generateReferenceNumber() {
-        const d = new Date();
-        const yyyymmdd = d.getFullYear() + ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2);
-        const hhmmss = ('0' + d.getHours()).slice(-2) + ('0' + d.getMinutes()).slice(-2) + ('0' + d.getSeconds()).slice(-2);
-        return `CHC-${yyyymmdd}-${hhmmss}`;
-    }
-
-    function toggleMobileMenu(show) {
-        document.getElementById('mobile-menu').style.display = show ? 'flex' : 'none';
-    }
-
-    let notificationTimeout;
-    function showNotification(message) {
-        const desktopNotification = document.getElementById('desktop-notification-area');
-        const mobileNotification = document.getElementById('mobile-notification-area');
-        desktopNotification.textContent = mobileNotification.textContent = message;
-        desktopNotification.style.display = mobileNotification.style.display = 'block';
-        if (notificationTimeout) clearTimeout(notificationTimeout);
-        notificationTimeout = setTimeout(() => {
-            desktopNotification.style.display = mobileNotification.style.display = 'none';
-        }, 4000);
+        return `CHC-${new Date().toISOString().replace(/[-:.]/g, "")}`;
     }
 
     function saveToLocalStorage() { localStorage.setItem('prescriptionFormData', JSON.stringify(getFormDataAsObject())); }
+
     function loadFromLocalStorage() {
         const savedData = localStorage.getItem('prescriptionFormData');
-        if (savedData) try { populateFormFromData(JSON.parse(savedData)); } catch (e) { localStorage.removeItem('prescriptionFormData'); }
+        if (savedData) {
+            try {
+                populateFormFromData(JSON.parse(savedData));
+            } catch (e) {
+                localStorage.removeItem('prescriptionFormData');
+            }
+        }
     }
+
     function saveRequestToFile() {
         const formData = getFormDataAsObject();
-        const patientName = formData.patientDetails.name;
-        if (!patientName) { alert("Please enter a patient name before saving."); return; }
+        if (!formData.patientDetails.name) { alert("Please enter a patient name before saving."); return; }
         const dataStr = JSON.stringify(formData, null, 2);
         const dataBlob = new Blob([dataStr], {type: "application/json"});
-        const url = URL.createObjectURL(dataBlob);
         const link = document.createElement("a");
-        const safeName = patientName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-        link.href = url;
-        link.download = `prescription_request_${safeName}_${new Date().toISOString().split('T')[0]}.json`;
+        link.href = URL.createObjectURL(dataBlob);
+        link.download = `prescription_request_${formData.patientDetails.name.replace(/ /g, "_")}_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(link);
         link.click();
-        URL.revokeObjectURL(url);
-        showNotification(`Request for ${patientName} saved.`);
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
     }
 
     function loadRequestFromFile(event) {
         const file = event.target.files[0];
         if (!file) return;
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = (e) => {
             try {
                 const data = JSON.parse(e.target.result);
                 populateFormFromData(data);
                 saveToLocalStorage();
-                const patientName = data.patientDetails.name || 'request';
-                showNotification(`Prescriptions for ${patientName} loaded.`);
-            } catch (error) { showNotification("Error: Could not load file."); }
+            } catch (error) {
+                alert("Error: Could not load file. It may be invalid JSON.");
+            }
         };
         reader.readAsText(file);
         event.target.value = null;
     }
-    
+
     function submitToGoogleForm() {
+        if (!validatePatientDetails()) return;
         const { patientDetails, medicationList } = getFormDataAsObject();
-        if (GOOGLE_FORM_URL.includes("1FAIpQLS") === false) {
-            alert("SYSTEM ERROR: The form has not been configured.");
-            return;
-        }
-        
+        if (medicationList.length === 0) { alert("Please add at least one medication."); return; }
+
         const medicationText = medicationList.map(med => `${med.name}~${med.dosage}~${med.freq}`).join("|");
-        
+
         const formData = new FormData();
         formData.append(PATIENT_NAME_ENTRY, patientDetails.name);
         formData.append(PATIENT_EMAIL_ENTRY, patientDetails.email);
@@ -200,25 +389,11 @@
         formData.append(COMMUNICATION_PREF_ENTRY, patientDetails.commPref);
         formData.append(MEDICATION_LIST_ENTRY, medicationText);
 
-        fetch(GOOGLE_FORM_URL, {
-            method: 'POST',
-            body: formData,
-            mode: 'no-cors'
-        }).catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred while submitting the form. Please try again.');
-        });
-        
+        fetch(GOOGLE_FORM_URL, { method: 'POST', body: formData, mode: 'no-cors' });
+
         document.getElementById('summaryModal').style.display = 'none';
         const ref = generateReferenceNumber();
-        document.getElementById('formContainer').innerHTML = `
-            <div class="success-message">
-                <h2>Thank You!</h2>
-                <p>Your prescription request has been submitted.</p>
-                <p>Your reference number is: <strong>${ref}</strong></p>
-                <p>Please keep this for your records.</p>
-            </div>
-        `;
+        document.getElementById('formContainer').innerHTML = `<div class="success-message"><h2>Thank You!</h2><p>Your prescription request has been submitted.</p><p>Your reference number is: <strong>${ref}</strong></p><p>Please keep this for your records.</p></div>`;
     }
 </script>
 </body>
