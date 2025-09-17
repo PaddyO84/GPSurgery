@@ -172,16 +172,13 @@
     const replyForm = document.getElementById('replyForm');
     const submitButton = document.getElementById('submitButton');
     const statusDiv = document.getElementById('submission-status');
+    const replySection = document.getElementById('reply-section');
 
     replyForm.addEventListener('submit', function(e) {
       e.preventDefault();
-      if (!validateForm()) {
-        return;
-      }
 
       submitButton.disabled = true;
       submitButton.textContent = 'Sending...';
-      statusDiv.style.display = 'none';
 
       const formData = new FormData(this);
       const data = {};
@@ -193,31 +190,17 @@
         .doPost({ postData: { contents: JSON.stringify(data), type: 'application/json' } });
     });
 
-    function validateForm() {
-      let isValid = true;
-      const messageInput = document.getElementById('replyMessage');
-      const messageError = document.getElementById('messageError');
-      if (messageInput.value.trim() === '') {
-        messageError.style.display = 'block';
-        isValid = false;
-      } else {
-        messageError.style.display = 'none';
-      }
-      return isValid;
-    }
-
     function onSuccess(response) {
-      document.getElementById('reply-section').style.display = 'none';
+      replySection.style.display = 'none';
       statusDiv.style.display = 'block';
       statusDiv.className = 'success';
-      statusDiv.innerHTML = '<h2>Thank You!</h2><p>Your reply has been sent successfully. You can now close this window.</p>';
+      statusDiv.innerHTML = '<h2>Thank You!</h2><p>Your reply has been sent successfully.</p>';
     }
 
     function onFailure(error) {
       statusDiv.style.display = 'block';
       statusDiv.className = 'error';
-      statusDiv.innerHTML = `<strong>Error:</strong> ${error.message}. Please try again or contact the clinic directly if the problem persists.`;
-
+      statusDiv.innerHTML = `<strong>Error:</strong> ${error.message}. Please try again.`;
       submitButton.disabled = false;
       submitButton.textContent = 'Send Reply';
     }
