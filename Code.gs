@@ -38,23 +38,23 @@ const FOOTER = `<p style="font-size:0.9em; color:#666;"><i>Please note: This is 
 
 function onOpen() {
   const ui = SpreadsheetApp.getUi();
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  setupSheet(ss, MESSAGES_SHEET_NAME, ["Message ID", "Timestamp", "Patient Name", "Patient DOB", "Patient Email", "Initial Message", "Conversation History", "Status", "Last Updated"]);
+  setupSheet(ui.getActiveSpreadsheet(), MESSAGES_SHEET_NAME, ["Message ID", "Timestamp", "Patient Name", "Patient DOB", "Patient Email", "Initial Message", "Conversation History", "Status", "Last Updated"]);
 
   const menu = ui.createMenu('Surgery Tools');
-  const activeSheetName = ss.getActiveSheet().getName();
 
-  if (activeSheetName === PRESCRIPTIONS_SHEET_NAME) {
-    menu.addItem('Send Patient Notification', 'sendPrescriptionNotification');
-    menu.addSeparator();
-    const statusMenu = ui.createMenu('Set Status');
-    statusMenu.addItem(`Mark as '${STATUS_READY}'`, 'setPrescriptionStatusReady');
-    statusMenu.addItem(`Mark as '${STATUS_QUERY}'`, 'setPrescriptionStatusQuery');
-    menu.addSubMenu(statusMenu);
-  } else if (activeSheetName === MESSAGES_SHEET_NAME) {
-    menu.addItem('Reply to Message', 'showMessageReplyDialog');
-    menu.addItem('Mark as Closed', 'markMessageClosed');
-  }
+  // Prescription Menu
+  const prescriptionMenu = ui.createMenu('Prescriptions');
+  prescriptionMenu.addItem('Send Patient Notification', 'sendPrescriptionNotification');
+  prescriptionMenu.addSeparator();
+  prescriptionMenu.addItem(`Mark as '${STATUS_READY}'`, 'setPrescriptionStatusReady');
+  prescriptionMenu.addItem(`Mark as '${STATUS_QUERY}'`, 'setPrescriptionStatusQuery');
+  menu.addSubMenu(prescriptionMenu);
+
+  // Messaging Menu
+  const messagingMenu = ui.createMenu('Messaging');
+  messagingMenu.addItem('Reply to Message', 'showMessageReplyDialog');
+  messagingMenu.addItem('Mark Message as Closed', 'markMessageClosed');
+  menu.addSubMenu(messagingMenu);
 
   menu.addToUi();
 }
@@ -66,11 +66,11 @@ function doGet(e) {
       const messageId = e.parameter.id;
       if (!messageId) return ContentService.createTextOutput("Error: Missing message ID.");
       return serveReplyPage(messageId);
-    } else { // default to message form
-      return HtmlService.createHtmlOutputFromFile('message_form.html')
-          .setTitle("New Message | Carndonagh Health Centre")
-          .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DEFAULT);
     }
+    // Default to the new message form for any other case
+    return HtmlService.createHtmlOutputFromFile('message_form')
+        .setTitle("New Message | Carndonagh Health Centre")
+        .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DEFAULT);
   } catch (err) {
     reportError('doGet', err, null);
     return ContentService.createTextOutput("An error occurred. The administrator has been notified.");
@@ -235,7 +235,7 @@ function serveReplyPage(messageId) {
   const initialMessage = `--- ORIGINAL MESSAGE on ${Utilities.formatDate(new Date(messagesSheet.getRange(rowNumber, MSG_TIMESTAMP_COL).getValue()), "Europe/Dublin", "dd/MM/yyyy HH:mm")} ---\n${messagesSheet.getRange(rowNumber, MSG_INITIAL_MESSAGE_COL).getValue()}`;
   const history = messagesSheet.getRange(rowNumber, MSG_CONVERSATION_COL).getValue();
   const conversationHistory = history ? `${initialMessage}\n\n${history}` : initialMessage;
-  const template = HtmlService.createTemplateFromFile('reply_form.html');
+  const template = HtmlService.createTemplateFromFile('reply_form');
   template.messageId = messageId;
   template.conversationHistory = conversationHistory;
   return template.evaluate().setTitle(`Reply to ${messageId}`).setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DEFAULT);
@@ -244,7 +244,13 @@ function serveReplyPage(messageId) {
 
 // --- 4. PRESCRIPTION WORKFLOW LOGIC ---
 
-function sendPrescriptionNotification() { /* ... Placeholder for manual notification ... */ }
+function sendPrescriptionNotification() {
+  const ui = SpreadsheetApp.getUi();
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  if (sheet.getName() !== PRESCRIPTIONS_SHEET_NAME) { ui.alert("This function is for the prescriptions sheet."); return; }
+  // This needs to be fully implemented with the dialogs. For now, it's a placeholder.
+  ui.alert("Manual notification feature needs to be fully implemented.");
+}
 function setPrescriptionStatusReady() { setStatus(STATUS_READY); }
 function setPrescriptionStatusQuery() { setStatus(STATUS_QUERY); }
 
