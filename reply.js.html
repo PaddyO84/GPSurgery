@@ -1,0 +1,37 @@
+<script>
+    const replyForm = document.getElementById('replyForm');
+    const submitButton = document.getElementById('submitButton');
+    const statusDiv = document.getElementById('submission-status');
+    const replySection = document.getElementById('reply-section');
+
+    replyForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      submitButton.disabled = true;
+      submitButton.textContent = 'Sending...';
+
+      const formData = new FormData(this);
+      const data = {};
+      formData.forEach((value, key) => data[key] = value);
+
+      google.script.run
+        .withSuccessHandler(onSuccess)
+        .withFailureHandler(onFailure)
+        .doPost({ postData: { contents: JSON.stringify(data), type: 'application/json' } });
+    });
+
+    function onSuccess(response) {
+      replySection.style.display = 'none';
+      statusDiv.style.display = 'block';
+      statusDiv.className = 'success';
+      statusDiv.innerHTML = '<h2>Thank You!</h2><p>Your reply has been sent successfully.</p>';
+    }
+
+    function onFailure(error) {
+      statusDiv.style.display = 'block';
+      statusDiv.className = 'error';
+      statusDiv.innerHTML = `<strong>Error:</strong> ${error.message}. Please try again.`;
+      submitButton.disabled = false;
+      submitButton.textContent = 'Send Reply';
+    }
+  </script>
