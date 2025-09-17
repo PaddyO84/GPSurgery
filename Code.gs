@@ -254,7 +254,7 @@ function markMessageClosed() {
   const timestamp = Utilities.formatDate(new Date(), "Europe/Dublin", "dd/MM/yyyy HH:mm:ss");
   sheet.getRange(range.getRow(), CONFIG.COLUMN_MAP.MESSAGES.STATUS, range.getNumRows(), 1).setValue(CONFIG.STATUSES.CLOSED);
   sheet.getRange(range.getRow(), CONFIG.COLUMN_MAP.MESSAGES.LAST_UPDATED, range.getNumRows(), 1).setValue(timestamp);
-  ui.toast(`${range.getNumRows()} message(s) marked as Closed.`);
+  SpreadsheetApp.getActiveSpreadsheet().toast(`${range.getNumRows()} message(s) marked as Closed.`);
 }
 
 function serveReplyPage(messageId) {
