@@ -172,11 +172,8 @@
     messageForm.addEventListener('submit', function(e) {
       e.preventDefault();
 
-      // Basic validation can be added here in the future.
-
       submitButton.disabled = true;
       submitButton.textContent = 'Sending...';
-      statusDiv.style.display = 'none';
 
       const formData = new FormData(this);
       const data = {};
@@ -192,14 +189,13 @@
       messageForm.style.display = 'none';
       statusDiv.style.display = 'block';
       statusDiv.className = 'success';
-      statusDiv.innerHTML = '<h2>Thank You!</h2><p>Your message has been sent successfully. We will get back to you shortly. You can now close this window.</p>';
+      statusDiv.innerHTML = '<h2>Thank You!</h2><p>Your message has been sent successfully.</p>';
     }
 
     function onFailure(error) {
       statusDiv.style.display = 'block';
       statusDiv.className = 'error';
       statusDiv.innerHTML = `<strong>Error:</strong> ${error.message}. Please try again.`;
-
       submitButton.disabled = false;
       submitButton.textContent = 'Send Message';
     }
