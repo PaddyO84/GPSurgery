@@ -68,7 +68,7 @@ function doGet(e) {
       return serveReplyPage(messageId);
     }
     // Default to the new message form for any other case
-    return HtmlService.createHtmlOutputFromFile('message_form.html')
+    return HtmlService.createHtmlOutputFromFile('message_form')
         .setTitle("New Message | Carndonagh Health Centre")
         .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DEFAULT);
   } catch (err) {
