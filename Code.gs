@@ -38,7 +38,7 @@ function doGet(e) {
       if (!messageId) return ContentService.createTextOutput("Error: Missing message ID.");
       return serveReplyPage(messageId);
     }
-    return HtmlService.createHtmlOutputFromFile('message_form')
+    return HtmlService.createHtmlOutputFromFile('index')
         .setTitle("New Message | Carndonagh Health Centre")
         .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DEFAULT);
   } catch (err) {
@@ -193,7 +193,7 @@ function serveReplyPage(messageId) {
   const initialMessage = `--- ORIGINAL MESSAGE on ${Utilities.formatDate(new Date(messagesSheet.getRange(rowNumber, MSG_TIMESTAMP_COL).getValue()), "Europe/Dublin", "dd/MM/yyyy HH:mm")} ---\n${messagesSheet.getRange(rowNumber, MSG_INITIAL_MESSAGE_COL).getValue()}`;
   const history = messagesSheet.getRange(rowNumber, MSG_CONVERSATION_COL).getValue();
   const conversationHistory = history ? `${initialMessage}\n\n${history}` : initialMessage;
-  const template = HtmlService.createTemplateFromFile('reply_form');
+  const template = HtmlService.createTemplateFromFile('reply');
   template.messageId = messageId;
   template.conversationHistory = conversationHistory;
   return template.evaluate().setTitle(`Reply to ${messageId}`).setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DEFAULT);
@@ -203,20 +203,117 @@ function serveReplyPage(messageId) {
 function sendPrescriptionNotification() { SpreadsheetApp.getUi().alert("Manual notification feature needs to be fully implemented."); }
 function setPrescriptionStatusReady() { setStatus(STATUS_READY); }
 function setPrescriptionStatusQuery() { setStatus(STATUS_QUERY); }
-function setStatus(e) {
-  const t = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  if (t.getName() !== PRESCRIPTIONS_SHEET_NAME) return void SpreadsheetApp.getUi().alert("This function is for the prescriptions sheet.");
-  const o = t.getActiveRange();
-  if (o.getRow() < 2) return void SpreadsheetApp.getUi().alert("Please select one or more patient rows first.");
-  t.getRange(o.getRow(), PR_STATUS_COL, o.getNumRows(), 1).setValue(e);
+function setStatus(status) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  if (sheet.getName() !== PRESCRIPTIONS_SHEET_NAME) return void SpreadsheetApp.getUi().alert("This function is for the prescriptions sheet.");
+  const range = sheet.getActiveRange();
+  if (range.getRow() < 2) return void SpreadsheetApp.getUi().alert("Please select one or more patient rows first.");
+  sheet.getRange(range.getRow(), PR_STATUS_COL, range.getNumRows(), 1).setValue(status);
 }
-function sendConfirmationNotification(e, t, o) { if (!t) return void Logger.log(`Confirmation not sent for ${e}: No email.`); const a = "Confirmation: We've Received Your Prescription Request", n = o && "whatsapp" === o.toLowerCase() ? "WhatsApp" : "Email", r = `<p>Dear ${e},</p><p>Thank you for your repeat prescription request. This is to confirm we have received it.</p><p>You will receive a final notification by <strong>${n}</strong> once your prescription has been sent to your chosen pharmacy.</p><p>Thank you,<br><strong>${SENDER_NAME}</strong></p><hr>${FOOTER}`; try { MailApp.sendEmail(t, a, "", { htmlBody: r, name: SENDER_NAME }) } catch (e) { Logger.log(`Failed to send confirmation email to ${t}. Error: ${e}`) } }
-function sendReadyEmail(e) { const t = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet(), o = t.getRange(e, PR_NAME_COL).getValue(), a = t.getRange(e, PR_EMAIL_COL).getValue(), n = t.getRange(e, PR_PHARMACY_COL).getValue(); if (!a) return; const r = `Your Prescription has been sent to ${n}`, s = `<p>Dear ${o},</p><p>Your recent prescription request has been processed and sent to <strong>${n}</strong>.</p><p>Please contact your pharmacy directly to confirm collection time.</p><p>Thank you,<br><strong>${SENDER_NAME}</strong></p><hr>${FOOTER}`; MailApp.sendEmail(a, r, "", { htmlBody: s, name: SENDER_NAME }) }
-function sendQueryEmail(e) { const t = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet(), o = t.getRange(e, PR_NAME_COL).getValue(), a = t.getRange(e, PR_EMAIL_COL).getValue(); if (!a) return; const n = "Action Required: Query Regarding Your Prescription Request", r = `<p>Dear ${o},</p><p>Regarding your prescription request, we have a query that needs to be resolved.</p><p>Please contact the surgery by phone.</p><p>Thank you,</p><p><strong>${SENDER_NAME}</strong></p><hr>${FOOTER}`; MailApp.sendEmail(a, n, "", { htmlBody: r, name: SENDER_NAME }) }
-function sendWhatsAppLinkToStaff(e) { const t = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet(), o = t.getRange(e, PR_NAME_COL).getValue(), a = t.getRange(e, PR_PHONE_COL).getValue(), n = t.getRange(e, PR_PHARMACY_COL).getValue(); if (!a) return; const r = Session.getActiveUser().getEmail(), s = `Hi ${o}, this is a message from ${SENDER_NAME}. Your prescription has been sent to ${n}. Please contact them directly to arrange collection.`, i = "353" + a.toString().replace(/\s/g, "").substring(1), d = encodeURIComponent(s), c = `https://wa.me/${i}?text=${d}`, l = `Action Required: Send WhatsApp to ${o}`, u = `<p>Hi,</p><p>Please send the prescription notification to <strong>${o}</strong> by clicking the link below.</p><p><a href="${c}">Click Here to Send WhatsApp Message</a></p>`; MailApp.sendEmail(r, l, "", { htmlBody: u }) }
-function archiveOldRequests() { const e = SpreadsheetApp.getActiveSpreadsheet(), t = e.getSheetByName(PRESCRIPTIONS_SHEET_NAME); let o = e.getSheetByName(ARCHIVE_SHEET_NAME); o || (o = setupSheet(e, ARCHIVE_SHEET_NAME, t.getRange(1, 1, 1, t.getLastColumn()).getValues()[0])); const a = t.getRange(2, 1, t.getLastRow() - 1, t.getLastColumn()).getValues(), n = new Date; n.setDate(n.getDate() - 180); for (let e = a.length - 1; e >= 0; e--) { const t = a[e], r = t[PR_STATUS_COL - 1], s = t[PR_NOTIFICATION_COL - 1]; if (r === STATUS_READY && s && s.startsWith("Processed on ")) { const t = s.replace("Processed on ", "").split("/"); if (3 === t.length) { const r = new Date(parseInt(t[2], 10), parseInt(t[1], 10) - 1, parseInt(t[0], 10)); if (r < n) { o.appendRow(a[e]), sourceSheet.deleteRow(e + 2) } } } } }
+function sendConfirmationNotification(patientName, patientEmail, commPref) {
+    if (!patientEmail) {
+        Logger.log(`Confirmation not sent for ${patientName}: No email.`);
+        return;
+    }
+    const subject = "Confirmation: We've Received Your Prescription Request";
+    const commMethod = commPref && commPref.toLowerCase() === 'whatsapp' ? "WhatsApp" : "Email";
+    const body = `<p>Dear ${patientName},</p><p>Thank you for your repeat prescription request. This is to confirm we have received it.</p><p>You will receive a final notification by <strong>${commMethod}</strong> once your prescription has been sent to your chosen pharmacy.</p><p>Thank you,<br><strong>${SENDER_NAME}</strong></p><hr>${FOOTER}`;
+    try {
+        MailApp.sendEmail(patientEmail, subject, "", { htmlBody: body, name: SENDER_NAME });
+    } catch (e) {
+        Logger.log(`Failed to send confirmation email to ${patientEmail}. Error: ${e}`);
+    }
+}
+function sendReadyEmail(row) {
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    const patientName = sheet.getRange(row, PR_NAME_COL).getValue();
+    const patientEmail = sheet.getRange(row, PR_EMAIL_COL).getValue();
+    const pharmacy = sheet.getRange(row, PR_PHARMACY_COL).getValue();
+    if (!patientEmail) return;
+    const subject = `Your Prescription has been sent to ${pharmacy}`;
+    const body = `<p>Dear ${patientName},</p><p>Your recent prescription request has been processed and sent to <strong>${pharmacy}</strong>.</p><p>Please contact your pharmacy directly to confirm collection time.</p><p>Thank you,<br><strong>${SENDER_NAME}</strong></p><hr>${FOOTER}`;
+    MailApp.sendEmail(patientEmail, subject, "", { htmlBody: body, name: SENDER_NAME });
+}
+function sendQueryEmail(row) {
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    const patientName = sheet.getRange(row, PR_NAME_COL).getValue();
+    const patientEmail = sheet.getRange(row, PR_EMAIL_COL).getValue();
+    if (!patientEmail) return;
+    const subject = "Action Required: Query Regarding Your Prescription Request";
+    const body = `<p>Dear ${patientName},</p><p>Regarding your prescription request, we have a query that needs to be resolved.</p><p>Please contact the surgery by phone.</p><p>Thank you,</p><p><strong>${SENDER_NAME}</strong></p><hr>${FOOTER}`;
+    MailApp.sendEmail(patientEmail, subject, "", { htmlBody: body, name: SENDER_NAME });
+}
+function sendWhatsAppLinkToStaff(row) {
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    const patientName = sheet.getRange(row, PR_NAME_COL).getValue();
+    const phone = sheet.getRange(row, PR_PHONE_COL).getValue();
+    const pharmacy = sheet.getRange(row, PR_PHARMACY_COL).getValue();
+    if (!phone) return;
+    const staffEmail = Session.getActiveUser().getEmail();
+    const message = `Hi ${patientName}, this is a message from ${SENDER_NAME}. Your prescription has been sent to ${pharmacy}. Please contact them directly to arrange collection.`;
+    const phoneE164 = "353" + phone.toString().replace(/\s/g, "").substring(1);
+    const encodedMessage = encodeURIComponent(message);
+    const waLink = `https://wa.me/${phoneE164}?text=${encodedMessage}`;
+    const subject = `Action Required: Send WhatsApp to ${patientName}`;
+    const body = `<p>Hi,</p><p>Please send the prescription notification to <strong>${patientName}</strong> by clicking the link below.</p><p><a href="${waLink}">Click Here to Send WhatsApp Message</a></p>`;
+    MailApp.sendEmail(staffEmail, subject, "", { htmlBody: body });
+}
+function archiveOldRequests() {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sourceSheet = ss.getSheetByName(PRESCRIPTIONS_SHEET_NAME);
+    let archiveSheet = ss.getSheetByName(ARCHIVE_SHEET_NAME);
+    if (!archiveSheet) {
+        archiveSheet = setupSheet(ss, ARCHIVE_SHEET_NAME, sourceSheet.getRange(1, 1, 1, sourceSheet.getLastColumn()).getValues()[0]);
+    }
+    const data = sourceSheet.getRange(2, 1, sourceSheet.getLastRow() - 1, sourceSheet.getLastColumn()).getValues();
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - 180);
+    for (let i = data.length - 1; i >= 0; i--) {
+        const row = data[i];
+        const status = row[PR_STATUS_COL - 1];
+        const notificationDateStr = row[PR_NOTIFICATION_COL - 1];
+        if (status === STATUS_READY && notificationDateStr && notificationDateStr.startsWith("Processed on ")) {
+            const dateParts = notificationDateStr.replace("Processed on ", "").split("/");
+            if (dateParts.length === 3) {
+                const notificationDate = new Date(parseInt(dateParts[2], 10), parseInt(dateParts[1], 10) - 1, parseInt(dateParts[0], 10));
+                if (notificationDate < cutoffDate) {
+                    archiveSheet.appendRow(row);
+                    sourceSheet.deleteRow(i + 2);
+                }
+            }
+        }
+    }
+}
 
 // --- 5. UTILITY FUNCTIONS ---
-function setupSheet(e, t, o) { let a = e.getSheetByName(t); a || (a = e.insertSheet(t), a.getRange(1, 1, 1, o.length).setValues([o]).setFontWeight("bold"), a.setFrozenRows(1)) }
-function findRowByMessageId(e, t) { const o = e.getRange(2, 1, e.getLastRow() > 1 ? e.getLastRow() - 1 : 1, 1).getValues(); for (let e = 0; e < o.length; e++)if (o[e][0] === t) return e + 2; return -1 }
-function reportError(e, t, o) { try { const a = `Script Error: ${e}`, n = Utilities.formatDate(new Date, "Europe/Dublin", "dd/MM/yyyy HH:mm:ss"); let r = `An error occurred in <strong>${e}</strong> at ${n}.`; o && (r += `<br><br>Related to row <strong>${o}</strong>.`), r += `<br><br><strong>Error Details:</strong><br>Name: ${t.name}<br>Message: ${t.message}<br>Stack Trace:<br>${t.stack.replace(/\n/g, "<br>")}`, MailApp.sendEmail(ADMIN_EMAIL, a, "", { htmlBody: r }) } catch (e) { Logger.log(`Could not send error report. Original error in ${e}: ${t.message}. Report error: ${e.message}`) } }
+function setupSheet(ss, sheetName, headers) {
+    let sheet = ss.getSheetByName(sheetName);
+    if (!sheet) {
+        sheet = ss.insertSheet(sheetName);
+        sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight("bold");
+        sheet.setFrozenRows(1);
+    }
+}
+function findRowByMessageId(sheet, messageId) {
+    const data = sheet.getRange(2, 1, sheet.getLastRow() > 1 ? sheet.getLastRow() - 1 : 1, 1).getValues();
+    for (let i = 0; i < data.length; i++) {
+        if (data[i][0] === messageId) {
+            return i + 2;
+        }
+    }
+    return -1;
+}
+function reportError(functionName, error, row) {
+    try {
+        const subject = `Script Error: ${functionName}`;
+        const timestamp = Utilities.formatDate(new Date(), "Europe/Dublin", "dd/MM/yyyy HH:mm:ss");
+        let body = `An error occurred in <strong>${functionName}</strong> at ${timestamp}.`;
+        if (row) {
+            body += `<br><br>Related to row <strong>${row}</strong>.`;
+        }
+        body += `<br><br><strong>Error Details:</strong><br>Name: ${error.name}<br>Message: ${error.message}<br>Stack Trace:<br>${error.stack.replace(/\n/g, "<br>")}`;
+        MailApp.sendEmail(ADMIN_EMAIL, subject, "", { htmlBody: body });
+    } catch (e) {
+        Logger.log(`Could not send error report. Original error in ${functionName}: ${error.message}. Report error: ${e.message}`);
+    }
+}
