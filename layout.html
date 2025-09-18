@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= pageTitle ?> | Carndonagh Health Centre</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <?!= include('style.css'); ?>
+  </head>
+  <body>
+
+    <header>
+      <!-- Logo and clinic name -->
+      <div class="container text-center py-3">
+        <a href="?page=home">
+          <!-- I will use a placeholder for the logo for now -->
+          <img src="https://via.placeholder.com/150x50.png?text=Logo" alt="Carndonagh Health Centre Logo" style="max-width: 200px;">
+        </a>
+        <h1>Carndonagh Health Centre</h1>
+      </div>
+
+      <!-- Navigation Menu -->
+      <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+              <li class="nav-item"><a class="nav-link" href="?page=home">Home</a></li>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="patientInfoDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  Patient Info
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="patientInfoDropdown">
+                  <li><a class="dropdown-item" href="?page=appointments">Appointments</a></li>
+                  <li><a class="dropdown-item" href="?page=prices">Price List</a></li>
+                  <li><a class="dropdown-item" href="?page=prescriptions">Prescriptions</a></li>
+                  <li><a class="dropdown-item" href="?page=test-results">Test Results</a></li>
+                  <li><a class="dropdown-item" href="?page=new-patients">New Patients</a></li>
+                  <li><a class="dropdown-item" href="?page=sick-notes">Sick Notes/Certification</a></li>
+                  <li><a class="dropdown-item" href="?page=payment">Payment</a></li>
+                  <li><a class="dropdown-item" href="?page=confidentiality">Confidentiality</a></li>
+                  <li><a class="dropdown-item" href="?page=unacceptable-behaviour">Unacceptable Behaviour</a></li>
+                </ul>
+              </li>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="onlineServicesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  Online Services
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="onlineServicesDropdown">
+                  <li><a class="dropdown-item" href="?page=sickness-certification">Sickness Certification</a></li>
+                </ul>
+              </li>
+              <li class="nav-item"><a class="nav-link" href="?page=forms">Useful Forms</a></li>
+              <li class="nav-item"><a class="nav-link" href="?page=contact">Contact</a></li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container my-4">
+      <?!= pageContent ?>
+    </main>
+
+    <footer class="bg-light text-center py-3 mt-auto">
+      <div class="container">
+        <p>&copy; <?= new Date().getFullYear() ?> Carndonagh Health Centre. All rights reserved.</p>
+        <p>
+          Derry Rd, Carndonagh, County Donegal | Tel: +353 74 937 4262
+        </p>
+      </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <?!= include('script.js'); ?>
+  </body>
+</html>
