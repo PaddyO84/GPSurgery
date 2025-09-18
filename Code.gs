@@ -59,15 +59,34 @@ function onOpen() {
 
 function doGet(e) {
   try {
-    const page = e.parameter.page;
-    if (page === 'reply') {
-      const messageId = e.parameter.id;
-      if (!messageId) return ContentService.createTextOutput("Error: Missing message ID.");
-      return serveReplyPage(messageId);
+    const page = e.parameter.page || 'index'; // Default to index page
+    const allowedPages = [
+      'index', 'appointments', 'prices', 'prescriptions',
+      'test-results', 'new-patients', 'sick-notes', 'payment',
+      'confidentiality', 'unacceptable-behaviour', 'online-services',
+      'sickness-certification', 'forms', 'contact', 'reply', 'new-message'
+    ];
+
+    if (allowedPages.includes(page)) {
+      if (page === 'reply') {
+        const messageId = e.parameter.id;
+        if (!messageId) return ContentService.createTextOutput("Error: Missing message ID.");
+        return serveReplyPage(messageId); // serveReplyPage uses templates itself
+      }
+
+      const template = HtmlService.createTemplateFromFile(page);
+      // This is a simple way to pass the page name to the template if needed
+      template.page = page;
+
+      return template.evaluate()
+          .setTitle(page.charAt(0).toUpperCase() + page.slice(1).replace(/-/g, ' ') + " | Carndonagh Health Centre")
+          .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DEFAULT);
+
+    } else {
+      // Optional: a simple 404 page
+      return HtmlService.createHtmlOutput('<h1>Page Not Found</h1>').setStatusCode(404);
     }
-    return HtmlService.createHtmlOutputFromFile('index')
-        .setTitle("New Message | Carndonagh Health Centre")
-        .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DEFAULT);
+
   } catch (err) {
     reportError('doGet', err, null);
     return ContentService.createTextOutput("An error occurred. The administrator has been notified.");
