@@ -9,6 +9,55 @@
     <link rel="stylesheet" href="style.css">
   </head>
   <body>
+    <header class="container">
+      <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="index.html">
+            <img src="https://images.squarespace-cdn.com/content/v1/5f7f0586bc20b071daab8716/733e2f32-5f0e-499a-96dc-c12115a531f1/Carndonagh+Health+Centre-logo.jpg?format=1500w" alt="Carndonagh Health Centre Logo" style="height: 50px;">
+          </a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+              <li class="nav-item">
+                <a class="nav-link" href="index.html">Home</a>
+              </li>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownPatientInfo" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  Patient Info
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdownPatientInfo">
+                  <li><a class="dropdown-item" href="appointments.html">Appointments</a></li>
+                  <li><a class="dropdown-item" href="prices.html">Price List</a></li>
+                  <li><a class="dropdown-item" href="prescriptions.html">Prescriptions</a></li>
+                  <li><a class="dropdown-item" href="test-results.html">Test Results</a></li>
+                  <li><a class="dropdown-item" href="new-patients.html">New Patients</a></li>
+                  <li><a class="dropdown-item" href="sick-notes.html">Sick Notes/Certification</a></li>
+                  <li><a class="dropdown-item" href="payment.html">Payment</a></li>
+                  <li><a class="dropdown-item" href="confidentiality.html">Confidentiality</a></li>
+                  <li><a class="dropdown-item" href="unacceptable-behaviour.html">Unacceptable Behaviour</a></li>
+                </ul>
+              </li>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownOnlineServices" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  Online Services
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdownOnlineServices">
+                  <li><a class="dropdown-item" href="sickness-certification.html">Sickness Certification</a></li>
+                </ul>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="forms.html">Useful Forms</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="contact.html">Contact</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    </header>
     <main class="container mt-4">
     <div class="container">
     <h2>New Patients</h2>
@@ -18,8 +67,11 @@
     </div>
 </div>
     </main>
+    <footer class="container mt-4 text-center">
+      <hr>
+      <p>Carndonagh Health Centre | Derry Rd, Carndonagh, County Donegal | Tel: (074) 93 74208 / (074) 93 74262</p>
+    </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="layout.js"></script>
-    <script src="main.js"></script>
+    <script src="script.js"></script>
   </body>
 </html>
