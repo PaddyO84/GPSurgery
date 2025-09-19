@@ -61,70 +61,73 @@
     <main class="container mt-4">
     <div class="sidebar">
     <h2>Controls</h2>
-    <button class="sidebar-btn" onclick="document.getElementById('file-input').click();" data-tooltip="Load a previously saved prescription request from your computer.">Load My Prescriptions</button>
-    <input type="file" id="file-input" style="display:none" onchange="loadRequestFromFile(event)" accept=".json">
-    <button class="sidebar-btn" onclick="saveRequestToFile()" data-tooltip="Save the current prescription details to a file on your computer.">Save My Prescriptions</button>
-    <button class="sidebar-btn" onclick="clearAllFields()" data-tooltip="Clear all fields in the form.">Clear Form</button>
-    <button class="sidebar-btn" onclick="printSummary()" data-tooltip="Generate a printable summary of your request.">Print Summary</button>
+    <button type="button" id="loadRequestBtn" class="sidebar-btn" data-tooltip="Load a previously saved prescription request from your computer.">Load My Prescriptions</button>
+    <input type="file" id="file-input" style="display:none" accept=".json">
+    <button type="button" id="saveRequestBtn" class="sidebar-btn" data-tooltip="Save the current prescription details to a file on your computer.">Save My Prescriptions</button>
+    <button type="button" id="clearFormBtn" class="sidebar-btn" data-tooltip="Clear all fields in the form.">Clear Form</button>
+    <button type="button" id="printSummaryBtn" class="sidebar-btn" data-tooltip="Generate a printable summary of your request.">Print Summary</button>
   </div>
 
   <div class="main-content" id="formContainer">
-    <h1>Repeat Prescription Request</h1>
+    <form id="prescriptionForm">
+      <h1>Repeat Prescription Request</h1>
 
-    <div class="form-section" id="patientDetailsSection">
-      <h2>Patient Details</h2>
-      <label for="patientName">Full Name:</label>
-      <input type="text" id="patientName" name="patientName">
-      <label for="patientDOB">Date of Birth:</label>
-      <input type="date" id="patientDOB" name="patientDOB">
-      <label for="patientAddress">Address:</label>
-      <textarea id="patientAddress" name="patientAddress" rows="3"></textarea>
-      <label for="patientEmail">Email:</label>
-      <input type="email" id="patientEmail" name="patientEmail">
-      <label for="patientPhone">Phone Number:</label>
-      <input type="tel" id="patientPhone" name="patientPhone">
-      <label for="chosenPharmacy">Pharmacy:</label>
-      <select id="chosenPharmacy" name="chosenPharmacy"></select>
-      <label>Preferred Contact Method:</label>
-      <input type="radio" id="prefEmail" name="communicationPref" value="Email" checked>
-      <label for="prefEmail">Email</label>
-      <input type="radio" id="prefWhatsapp" name="communicationPref" value="WhatsApp">
-      <label for="prefWhatsapp">WhatsApp</label>
-    </div>
+      <div class="form-section" id="patientDetailsSection">
+        <h2>Patient Details</h2>
+        <label for="patientName">Full Name:</label>
+        <input type="text" id="patientName" name="name" required>
+        <label for="patientDOB">Date of Birth:</label>
+        <input type="date" id="patientDOB" name="dob" required>
+        <label for="patientAddress">Address:</label>
+        <textarea id="patientAddress" name="address" rows="3"></textarea>
+        <label for="patientEmail">Email:</label>
+        <input type="email" id="patientEmail" name="email" required>
+        <label for="patientPhone">Phone Number:</label>
+        <input type="tel" id="patientPhone" name="phone">
+        <label for="chosenPharmacy">Pharmacy:</label>
+        <select id="chosenPharmacy" name="pharmacy" required></select>
+        <label>Preferred Contact Method:</label>
+        <input type="radio" id="prefEmail" name="commPref" value="Email" checked>
+        <label for="prefEmail">Email</label>
+        <input type="radio" id="prefWhatsapp" name="commPref" value="WhatsApp">
+        <label for="prefWhatsapp">WhatsApp</label>
+      </div>
 
-    <div class="form-section">
-      <h2>Add Medication</h2>
-      <label for="medName">Medication Name:</label>
-      <input type="text" id="medName" list="medication-list">
-      <datalist id="medication-list"></datalist>
-      <label for="medDosage">Dosage (e.g., 40mg):</label>
-      <input type="text" id="medDosage">
-      <label for="medFreq">Frequency:</label>
-      <select id="medFreq"></select>
-      <button onclick="addMedication()">Add Medication</button>
-    </div>
+      <div class="form-section">
+        <h2>Add Medication</h2>
+        <label for="medName">Medication Name:</label>
+        <input type="text" id="medName" list="medication-list">
+        <datalist id="medication-list"></datalist>
+        <label for="medDosage">Dosage (e.g., 40mg):</label>
+        <input type="text" id="medDosage">
+        <label for="medFreq">Frequency:</label>
+        <select id="medFreq"></select>
+        <button type="button" id="addMedicationBtn">Add Medication</button>
+      </div>
 
-    <div class="form-section">
-      <h2>Current Prescription List</h2>
-      <table id="medicationTable">
-        <thead>
-          <tr><th>Name</th><th>Dosage</th><th>Frequency</th><th>Action</th></tr>
-        </thead>
-        <tbody id="medicationList">
-        </tbody>
-      </table>
-    </div>
+      <div class="form-section">
+        <h2>Current Prescription List</h2>
+        <table id="medicationTable">
+          <thead>
+            <tr><th>Name</th><th>Dosage</th><th>Frequency</th><th>Action</th></tr>
+          </thead>
+          <tbody id="medicationList">
+          </tbody>
+        </table>
+      </div>
 
-    <button onclick="showSummary()" style="width:100%; padding: 15px; font-size: 18px; background-color: var(--success-green);">Submit Request</button>
+      <button type="submit" style="width:100%; padding: 15px; font-size: 18px; background-color: var(--success-green);">Review and Submit Request</button>
+    </form>
+    <div id="submission-status"></div>
   </div>
 
-  <div id="summaryModal">
+  <div id="summaryModal" class="modal">
     <div class="modal-content">
-      <span onclick="document.getElementById('summaryModal').style.display='none'" style="float:right; cursor:pointer; font-size: 2em; line-height: 1;">&times;</span>
+      <span class="close-button">&times;</span>
       <h2>Confirm Your Request</h2>
       <div id="summaryDetails"></div>
-      <button onclick="submitToGoogleForm()">Confirm and Submit</button>
-      <button onclick="document.getElementById('summaryModal').style.display='none'">Cancel</button>
+      <button type="button" id="confirmSubmitBtn">Confirm and Submit</button>
+      <button type="button" class="cancel-button">Cancel</button>
     </div>
   </div>
     </main>

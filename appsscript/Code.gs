@@ -74,6 +74,7 @@ function doPost(e) {
     switch (data.formType) {
       case 'newMessage': handleNewMessage(data); break;
       case 'replyMessage': handlePatientReply(data); break;
+      case 'prescriptionSubmission': handlePrescriptionSubmission(data); break;
       default: throw new Error("Invalid form type submitted.");
     }
     return ContentService.createTextOutput(JSON.stringify({ status: 'success' })).setMimeType(ContentService.MimeType.JSON);
@@ -104,45 +105,50 @@ function onEdit(e) {
   }
 }
 
-function onFormSubmit(e) {
-  try {
-    processPrescriptionSubmission(e);
-  } catch (err) {
-    // Catch any unexpected errors from the main logic
-    reportError('onFormSubmit Trigger', err, e.range ? e.range.getRow() : null);
-  }
-}
-
 /**
- * Processes a new prescription request from a Google Form submission.
- * @param {Object} e The form submission event object.
+ * Handles a new prescription request submitted from the custom web form.
+ * @param {Object} data The form data from the client.
  */
-function processPrescriptionSubmission(e) {
-  const sheet = e.range.getSheet();
-  const row = e.range.getRow();
-  const patientName = e.values[CONFIG.FORM_SUBMIT_INDICES.NAME];
-  const patientEmail = e.values[CONFIG.FORM_SUBMIT_INDICES.EMAIL];
-
-  // 1. Basic validation
-  if (!patientName || !patientEmail) {
-    reportError('processPrescriptionSubmission Validation', new Error(`Missing Name or Email in row ${row}.`), row);
-    return;
+function handlePrescriptionSubmission(data) {
+  // Basic validation
+  if (!data.name || !data.email) {
+    throw new Error("Patient name and email are required.");
   }
 
-  // 2. Send immediate confirmation to the patient
-  sendConfirmationNotification(patientName, patientEmail, e.values[CONFIG.FORM_SUBMIT_INDICES.COMM_PREF]);
-
-  // 3. Process and format the medication list if it exists
-  const medicationsRaw = e.values[CONFIG.FORM_SUBMIT_INDICES.MEDS];
-  if (medicationsRaw) {
-    const medList = parseMedicationString(medicationsRaw);
-    if (medList) {
-      sheet.getRange(row, CONFIG.COLUMN_MAP.PRESCRIPTIONS.MEDICATION_REQUEST).setValue(medList);
-    }
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.SHEETS.PRESCRIPTIONS);
+  if (!sheet) {
+    throw new Error(`Sheet "${CONFIG.SHEETS.PRESCRIPTIONS}" not found.`);
   }
 
-  // 4. Mark the submission as processed
-  sheet.getRange(row, CONFIG.COLUMN_MAP.PRESCRIPTIONS.NOTIFICATION_SENT).setValue(`${CONFIG.STATUSES.PROCESSED_PREFIX}${Utilities.formatDate(new Date(), "Europe/Dublin", CONFIG.DATE_FORMAT)}`);
+  // Ensure column map is initialized, as this function can be called without onOpen firing.
+  if (!CONFIG.COLUMN_MAP.PRESCRIPTIONS || Object.keys(CONFIG.COLUMN_MAP.PRESCRIPTIONS).length === 0) {
+    initializeColumnMap();
+  }
+  const columnMap = CONFIG.COLUMN_MAP.PRESCRIPTIONS;
+
+  // Dynamically build the row to append to ensure data lands in the correct column
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  const newRow = new Array(headers.length).fill('');
+
+  const medList = parseMedicationString(data.meds || '');
+  const processedStatus = `${CONFIG.STATUSES.PROCESSED_PREFIX}${Utilities.formatDate(new Date(), "Europe/Dublin", CONFIG.DATE_FORMAT)}`;
+
+  // Map data from the form to the correct columns using the columnMap
+  if (columnMap.TIMESTAMP) newRow[columnMap.TIMESTAMP - 1] = new Date();
+  if (columnMap.EMAIL_ADDRESS) newRow[columnMap.EMAIL_ADDRESS - 1] = data.email;
+  if (columnMap.YOUR_USUAL_PHARMACY) newRow[columnMap.YOUR_USUAL_PHARMACY - 1] = data.pharmacy;
+  if (columnMap.PATIENT_NAME) newRow[columnMap.PATIENT_NAME - 1] = data.name;
+  if (columnMap.PHONE_NUMBER) newRow[columnMap.PHONE_NUMBER - 1] = data.phone;
+  if (columnMap.DATE_OF_BIRTH) newRow[columnMap.DATE_OF_BIRTH - 1] = data.dob;
+  if (columnMap.I_AM_ORDERING_FOR) newRow[columnMap.I_AM_ORDERING_FOR - 1] = data.orderingFor;
+  if (columnMap.MEDICATION_REQUEST) newRow[columnMap.MEDICATION_REQUEST - 1] = medList;
+  if (columnMap.COMMUNICATION_PREFERENCE) newRow[columnMap.COMMUNICATION_PREFERENCE - 1] = data.commPref;
+  if (columnMap.NOTIFICATION_SENT) newRow[columnMap.NOTIFICATION_SENT - 1] = processedStatus;
+
+  sheet.appendRow(newRow);
+
+  // Send confirmation notification to the patient
+  sendConfirmationNotification(data.name, data.email, data.commPref);
 }
 
 /**
