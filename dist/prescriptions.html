@@ -1,118 +1,99 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <base target="_top">
+<html lang="en">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carndonagh Health Centre</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Prescriptions - Carndonagh Health Centre</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-  </head>
-  <body>
-    <header class="container">
-      <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container-fluid">
-          <a class="navbar-brand" href="index.html">
-            <img src="https://images.squarespace-cdn.com/content/v1/5f7f0586bc20b071daab8716/733e2f32-5f0e-499a-96dc-c12115a531f1/Carndonagh+Health+Centre-logo.jpg?format=1500w" alt="Carndonagh Health Centre Logo" style="height: 50px;">
-          </a>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-              <li class="nav-item">
-                <a class="nav-link" href="index.html">Home</a>
-              </li>
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownPatientInfo" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  Patient Info
+</head>
+<body>
+    <div class="page-wrapper">
+        <!-- Sidebar Navigation -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html">
+                    <img src="https://images.squarespace-cdn.com/content/v1/5f7f0586bc20b071daab8716/733e2f32-5f0e-499a-96dc-c12115a531f1/Carndonagh+Health+Centre-logo.jpg?format=1500w" alt="Carndonagh Health Centre Logo" class="logo">
+                    <h3>Carndonagh Health Centre</h3>
                 </a>
-                <ul class="dropdown-menu" aria-labelledby="navbarDropdownPatientInfo">
-                  <li><a class="dropdown-item" href="appointments.html">Appointments</a></li>
-                  <li><a class="dropdown-item" href="prices.html">Price List</a></li>
-                  <li><a class="dropdown-item" href="prescriptions.html">Prescriptions</a></li>
-                  <li><a class="dropdown-item" href="test-results.html">Test Results</a></li>
-                  <li><a class="dropdown-item" href="new-patients.html">New Patients</a></li>
-                  <li><a class="dropdown-item" href="sick-notes.html">Sick Notes/Certification</a></li>
-                  <li><a class="dropdown-item" href="payment.html">Payment</a></li>
-                  <li><a class="dropdown-item" href="confidentiality.html">Confidentiality</a></li>
-                  <li><a class="dropdown-item" href="unacceptable-behaviour.html">Unacceptable Behaviour</a></li>
-                </ul>
-              </li>
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownOnlineServices" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  Online Services
-                </a>
-                <ul class="dropdown-menu" aria-labelledby="navbarDropdownOnlineServices">
-                  <li><a class="dropdown-item" href="sickness-certification.html">Sickness Certification</a></li>
-                </ul>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="forms.html">Useful Forms</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="contact.html">Contact</a>
-              </li>
+            </div>
+            <ul class="nav-list">
+                <li><a href="index.html">Home</a></li>
+                <li class="nav-item-submenu open">
+                    <a href="#">Patient Info</a>
+                    <ul class="submenu">
+                        <li><a href="appointments.html">Appointments</a></li>
+                        <li><a href="prices.html">Price List</a></li>
+                        <li><a href="prescriptions.html" class="active">Prescriptions</a></li>
+                        <li><a href="test-results.html">Test Results</a></li>
+                        <li><a href="new-patients.html">New Patients</a></li>
+                        <li><a href="sick-notes.html">Sick Notes/Certification</a></li>
+                        <li><a href="payment.html">Payment</a></li>
+                        <li><a href="confidentiality.html">Confidentiality</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item-submenu">
+                    <a href="#">Online Services</a>
+                    <ul class="submenu">
+                        <li><a href="prescription_form.html">Repeat Prescriptions</a></li>
+                        <li><a href="sickness-certification.html">Sickness Certification</a></li>
+                    </ul>
+                </li>
+                <li><a href="forms.html">Useful Forms</a></li>
+                <li><a href="contact.html">Contact</a></li>
             </ul>
-          </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <div id="content">
+            <header class="top-header">
+                <button id="menu-toggle" class="hamburger-btn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <span class="header-title">Prescriptions</span>
+            </header>
+
+            <main class="main-content-inner">
+                <div class="container">
+                    <div class="card">
+                        <h2>Prescriptions</h2>
+
+                        <h3>How do I order my prescription?</h3>
+                        <p>You can order your repeat prescription by using our <a href="prescription_form.html">Online Prescription Form</a>.</p>
+                        <p>Alternatively, you can request a repeat prescription by dropping a written request into our letterbox at the practice, or by requesting it directly from your pharmacist who will place the order with us.</p>
+
+                        <h3>When will my prescription be ready?</h3>
+                        <p>You will be able to collect your prescription from your Pharmacy 48 hours (2 working days) after it has been ordered. Please check with your pharmacy before travelling to collect. Timelines are as follows;</p>
+                        <ul>
+                            <li><strong>Ordered Monday:</strong> Ready Wednesday</li>
+                            <li><strong>Ordered Tuesday:</strong> Ready Thursday</li>
+                            <li><strong>Ordered Wednesday:</strong> Ready Friday</li>
+                            <li><strong>Ordered Thursday:</strong> Ready Monday</li>
+                            <li><strong>Ordered Friday:</strong> Ready Tuesday</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>Repeat Prescriptions</h3>
+                        <p>Repeat prescriptions are available to patients without consultation once the medication has been agreed to by your GP and you have undergone an up-to-date medication review. If you wish to change your medication or dosage, please make an appointment to discuss this with your GP.</p>
+
+                        <h3>Where a consultation may be required</h3>
+                        <p>There are certain medications that can only be prescribed monthly and must be authorised by the attending GP. Examples include strong painkillers and sleeping tablets.</p>
+
+                        <h3>How often should I review my medication with my doctor?</h3>
+                        <p>If taking regular medications, you should review these at least every 12 months with your GP/Consultant to ensure you are on the best available medication for your condition.</p>
+                    </div>
+                </div>
+            </main>
+
+            <footer class="main-footer">
+                <p>Carndonagh Health Centre | Derry Rd, Carndonagh, County Donegal | Tel: (074) 93 74208 / (074) 93 74262</p>
+            </footer>
         </div>
-      </nav>
-    </header>
-    <main class="container mt-4">
-    <div class="container">
-    <h2>Prescriptions</h2>
-
-    <h3>How do I order my prescription?</h3>
-    <p>There are two ways to order your repeat prescription:</p>
-    <ol>
-        <li>
-            <strong>PAPER:</strong>
-            You can request a repeat prescription by dropping a written request into our letterbox at the practice. Please ensure your name, date of birth, and the required medications are clearly written.
-        </li>
-        <li>
-            <strong>PHARMACY:</strong>
-            You can also request a repeat prescription directly from your pharmacist who will place the order with us via email.
-        </li>
-    </ol>
-    <p class="text-danger">Please note: The online prescription ordering service is currently unavailable. Please use one of the methods above.</p>
-
-    <hr>
-
-    <h3>When will my prescription be ready?</h3>
-    <p>You will be able to collect your prescription from your Pharmacy 48 hours (2 working days) after it has been ordered. Please check with your pharmacy before travelling to collect. Timelines are as follows;</p>
-    <ul>
-        <li><strong>Ordered Monday:</strong> Ready Wednesday</li>
-        <li><strong>Ordered Tuesday:</strong> Ready Thursday</li>
-        <li><strong>Ordered Wednesday:</strong> Ready Friday</li>
-        <li><strong>Ordered Thursday:</strong> Ready Monday</li>
-        <li><strong>Ordered Friday:</strong> Ready Tuesday</li>
-    </ul>
-
-    <hr>
-
-    <h3>Repeat Prescriptions</h3>
-    <p>Repeat prescriptions are available to patients without consultation once the medication has been agreed to by your GP and you have undergone an up-to-date medication review. If you wish to change your medication or dosage, please make an appointment to discuss this with your GP.</p>
-
-    <h3>Where a consultation may be required</h3>
-    <p>There are certain medications that can only be prescribed monthly and must be authorised by the attending GP. Examples include strong painkillers and sleeping tablets.</p>
-
-    <h3>How often should I review my medication with my doctor?</h3>
-    <p>If taking regular medications, you should review these at least every 12 months with your GP/Consultant to ensure you are on the best available medication for your condition. Some questions you may ask are:</p>
-    <ul>
-        <li>Is this medication still meeting my health needs?</li>
-        <li>Do I still need to take this/these medications?</li>
-        <li>Is the medicine list on my record accurate?</li>
-    </ul>
-    <p>If you are on a repeat prescription, this may need to be reviewed every 6-12 months (depending on your health condition and the medication involved) to ensure you are on the best available treatment for your condition.</p>
-    <p>For patients with multi-morbidities (having a number of different ongoing medical conditions and often attending a number of clinics or specialists), you may be asked to attend for medication review at the practice more often.</p>
-    <p class="fw-bold">48 Hours notice is required for all repeat prescriptions.</p>
-</div>
-    </main>
-    <footer class="container mt-4 text-center">
-      <hr>
-      <p>Carndonagh Health Centre | Derry Rd, Carndonagh, County Donegal | Tel: (074) 93 74208 / (074) 93 74262</p>
-    </footer>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    </div>
     <script src="script.js"></script>
-  </body>
+</body>
 </html>

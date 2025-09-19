@@ -6,15 +6,6 @@ const CONFIG = {
     ARCHIVE: "Archive"
   },
   COLUMN_MAP: {}, // Populated by initializeColumnMap()
-  // These indices are for the e.values array from onFormSubmit, based on Google Form question order.
-  FORM_SUBMIT_INDICES: {
-    EMAIL: 1,       // "Email Address"
-    PHARMACY: 2,    // "Your Usual Pharmacy"
-    NAME: 3,        // "Patient Name"
-    PHONE: 5,       // "Phone number"
-    MEDS: 7,        // "Medication Request"
-    COMM_PREF: 8,   // "Communication Preference"
-  },
   SENDER_NAME: "Carndonagh Health Centre",
   ADMIN_EMAIL: "patricknoone+surgery@gmail.com",
   STATUSES: {
@@ -81,27 +72,6 @@ function doPost(e) {
   } catch (err) {
     reportError('doPost', err, null);
     return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: err.message })).setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-function onEdit(e) {
-  try {
-    const range = e.range;
-    const sheet = range.getSheet();
-    if (sheet.getName() !== CONFIG.SHEETS.PRESCRIPTIONS || !CONFIG.COLUMN_MAP.PRESCRIPTIONS || range.getColumn() !== CONFIG.COLUMN_MAP.PRESCRIPTIONS.STATUS || range.getRow() < 2) return;
-    const status = range.getValue().toString().trim();
-    if (status === CONFIG.STATUSES.READY) {
-      const commPref = sheet.getRange(range.getRow(), CONFIG.COLUMN_MAP.PRESCRIPTIONS.COMMUNICATION_PREFERENCE).getValue().toLowerCase();
-      if (commPref === CONFIG.STATUSES.COMM_WHATSAPP) {
-        sendWhatsAppLinkToStaff(range.getRow());
-      } else {
-        sendReadyEmail(range.getRow());
-      }
-    } else if (status === CONFIG.STATUSES.QUERY) {
-      sendQueryEmail(range.getRow());
-    }
-  } catch (err) {
-    reportError('onEdit', err, e.range ? e.range.getRow() : null);
   }
 }
 
