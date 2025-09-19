@@ -1,5 +1,5 @@
-<script>
-    const messageForm = document.getElementById('messageForm');
+const messageForm = document.getElementById('messageForm');
+if (messageForm) {
     const submitButton = document.getElementById('submitButton');
     const statusDiv = document.getElementById('submission-status');
 
@@ -12,25 +12,39 @@
       const formData = new FormData(this);
       const data = {};
       formData.forEach((value, key) => data[key] = value);
+      data.formType = 'newMessage';
 
-      google.script.run
-        .withSuccessHandler(onSuccess)
-        .withFailureHandler(onFailure)
-        .doPost({ postData: { contents: JSON.stringify(data), type: 'application/json' } });
+      fetch(WEB_APP_URL, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => response.json())
+      .then(response => {
+        if (response.status === 'success') {
+          onNewMessageSuccess(response);
+        } else {
+          onNewMessageFailure(response);
+        }
+      })
+      .catch(error => onNewMessageFailure({ message: error.message }));
     });
 
-    function onSuccess(response) {
+    function onNewMessageSuccess(response) {
       messageForm.style.display = 'none';
       statusDiv.style.display = 'block';
       statusDiv.className = 'success';
       statusDiv.innerHTML = '<h2>Thank You!</h2><p>Your message has been sent successfully.</p>';
     }
 
-    function onFailure(error) {
+    function onNewMessageFailure(error) {
       statusDiv.style.display = 'block';
       statusDiv.className = 'error';
       statusDiv.innerHTML = `<strong>Error:</strong> ${error.message}. Please try again.`;
       submitButton.disabled = false;
       submitButton.textContent = 'Send Message';
     }
-  </script>
+}
