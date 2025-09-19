@@ -4,6 +4,25 @@ const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyRY4uZgNAJMVf59BuZ
 
 // --- GLOBAL EVENT LISTENERS ---
 document.addEventListener('DOMContentLoaded', function() {
+    // --- NAVIGATION LOGIC ---
+    const menuToggle = document.getElementById('menu-toggle');
+    if (menuToggle) {
+        menuToggle.addEventListener('click', () => {
+            document.body.classList.toggle('sidebar-active');
+        });
+    }
+
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar) {
+        sidebar.addEventListener('click', (e) => {
+            const link = e.target.closest('a');
+            if (link && link.parentElement.classList.contains('nav-item-submenu')) {
+                e.preventDefault();
+                link.parentElement.classList.toggle('open');
+            }
+        });
+    }
+
     // --- REPLY PAGE LOGIC ---
     if (document.getElementById('reply-section')) {
         const urlParams = new URLSearchParams(window.location.search);
