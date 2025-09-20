@@ -63,17 +63,20 @@ function doGet(e) {
 
 function doPost(e) {
   try {
+    // ADDED THIS LINE FOR DEBUGGING:
+    Logger.log(JSON.stringify(e, null, 2)); 
+
     const data = JSON.parse(e.postData.contents);
     switch (data.formType) {
       case 'newMessage': handleNewMessage(data); break;
       case 'replyMessage': handlePatientReply(data); break;
-      case 'prescriptionSubmission': handlePrescriptionSubmission(data); break;
-      case 'appointmentBooking': handleAppointmentBooking(data); break;
       default: throw new Error("Invalid form type submitted.");
     }
     return ContentService.createTextOutput(JSON.stringify({ status: 'success' })).setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
     reportError('doPost', err, null);
+    // Log the detailed error so it appears in Executions
+    Logger.log(`Error in doPost: ${err.name} - ${err.message}\nStack: ${err.stack}`);
     return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: err.message })).setMimeType(ContentService.MimeType.JSON);
   }
 }
