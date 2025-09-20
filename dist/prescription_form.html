@@ -1,141 +1,102 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <base target="_top">
+<html lang="en">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carndonagh Health Centre</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Repeat Prescription Request - Carndonagh Health Centre</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-  </head>
-  <body>
-    <header class="container">
-      <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container-fluid">
-          <a class="navbar-brand" href="index.html">
-            <img src="https://images.squarespace-cdn.com/content/v1/5f7f0586bc20b071daab8716/733e2f32-5f0e-499a-96dc-c12115a531f1/Carndonagh+Health+Centre-logo.jpg?format=1500w" alt="Carndonagh Health Centre Logo" style="height: 50px;">
-          </a>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-              <li class="nav-item">
-                <a class="nav-link" href="index.html">Home</a>
-              </li>
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownPatientInfo" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  Patient Info
+</head>
+<body>
+    <div class="page-wrapper">
+        <!-- Sidebar Navigation -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html">
+                    <img src="https://images.squarespace-cdn.com/content/v1/5f7f0586bc20b071daab8716/733e2f32-5f0e-499a-96dc-c12115a531f1/Carndonagh+Health+Centre-logo.jpg?format=1500w" alt="Carndonagh Health Centre Logo" class="logo">
+                    <h3>Carndonagh Health Centre</h3>
                 </a>
-                <ul class="dropdown-menu" aria-labelledby="navbarDropdownPatientInfo">
-                  <li><a class="dropdown-item" href="appointments.html">Appointments</a></li>
-                  <li><a class="dropdown-item" href="prices.html">Price List</a></li>
-                  <li><a class="dropdown-item" href="prescriptions.html">Prescriptions</a></li>
-                  <li><a class="dropdown-item" href="test-results.html">Test Results</a></li>
-                  <li><a class="dropdown-item" href="new-patients.html">New Patients</a></li>
-                  <li><a class="dropdown-item" href="sick-notes.html">Sick Notes/Certification</a></li>
-                  <li><a class="dropdown-item" href="payment.html">Payment</a></li>
-                  <li><a class="dropdown-item" href="confidentiality.html">Confidentiality</a></li>
-                  <li><a class="dropdown-item" href="unacceptable-behaviour.html">Unacceptable Behaviour</a></li>
-                </ul>
-              </li>
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownOnlineServices" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  Online Services
-                </a>
-                <ul class="dropdown-menu" aria-labelledby="navbarDropdownOnlineServices">
-                  <li><a class="dropdown-item" href="sickness-certification.html">Sickness Certification</a></li>
-                </ul>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="forms.html">Useful Forms</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="contact.html">Contact</a>
-              </li>
+            </div>
+            <ul class="nav-list">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="services.html">Services</a></li>
+                <li><a href="book-appointment.html">Book Appointment</a></li>
+                <li><a href="contact.html">Contact</a></li>
             </ul>
-          </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <div id="content">
+            <header class="top-header">
+                <button id="menu-toggle" class="hamburger-btn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <span class="header-title">Repeat Prescription Request</span>
+            </header>
+
+            <main class="main-content-inner">
+                <div class="container-fluid d-flex"> <!-- Using a fluid container for this complex layout -->
+                    <div class="sidebar-controls">
+                        <h2>Controls</h2>
+                        <button type="button" id="loadRequestBtn" class="sidebar-btn">Load My Prescriptions</button>
+                        <input type="file" id="file-input" style="display:none" accept=".json">
+                        <button type="button" id="saveRequestBtn" class="sidebar-btn">Save My Prescriptions</button>
+                        <button type="button" id="clearFormBtn" class="sidebar-btn">Clear Form</button>
+                        <button type="button" id="printSummaryBtn" class="sidebar-btn">Print Summary</button>
+                    </div>
+
+                    <div class="form-container card">
+                        <form id="prescriptionForm">
+                            <div class="form-section" id="patientDetailsSection">
+                                <h2>Patient Details</h2>
+                                <div class="form-group"><label for="patientName">Full Name:</label><input type="text" id="patientName" name="name" required></div>
+                                <div class="form-group"><label for="patientDOB">Date of Birth:</label><input type="date" id="patientDOB" name="dob" required></div>
+                                <div class="form-group"><label for="patientAddress">Address:</label><textarea id="patientAddress" name="address" rows="3"></textarea></div>
+                                <div class="form-group"><label for="patientEmail">Email:</label><input type="email" id="patientEmail" name="email" required></div>
+                                <div class="form-group"><label for="patientPhone">Phone Number:</label><input type="tel" id="patientPhone" name="phone"></div>
+                                <div class="form-group"><label for="chosenPharmacy">Pharmacy:</label><select id="chosenPharmacy" name="pharmacy" required></select></div>
+                                <div class="form-group"><label>Preferred Contact Method:</label><div><input type="radio" id="prefEmail" name="commPref" value="Email" checked> <label for="prefEmail">Email</label> <input type="radio" id="prefWhatsapp" name="commPref" value="WhatsApp"> <label for="prefWhatsapp">WhatsApp</label></div></div>
+                            </div>
+                            <div class="form-section">
+                                <h2>Add Medication</h2>
+                                <div class="form-group"><label for="medName">Medication Name:</label><input type="text" id="medName" list="medication-list"><datalist id="medication-list"></datalist></div>
+                                <div class="form-group"><label for="medDosage">Dosage (e.g., 40mg):</label><input type="text" id="medDosage"></div>
+                                <div class="form-group"><label for="medFreq">Frequency:</label><select id="medFreq"></select></div>
+                                <button type="button" id="addMedicationBtn" class="btn">Add Medication</button>
+                            </div>
+                            <div class="form-section">
+                                <h2>Current Prescription List</h2>
+                                <table id="medicationTable" class="styled-table">
+                                    <thead><tr><th>Name</th><th>Dosage</th><th>Frequency</th><th>Action</th></tr></thead>
+                                    <tbody id="medicationList"></tbody>
+                                </table>
+                            </div>
+                            <button type="submit" class="btn btn-full-width">Review and Submit Request</button>
+                        </form>
+                        <div id="submission-status"></div>
+                    </div>
+                </div>
+            </main>
+
+            <footer class="main-footer">
+                <p>Carndonagh Health Centre | Derry Rd, Carndonagh, County Donegal | Tel: (074) 93 74208 / (074) 93 74262</p>
+            </footer>
         </div>
-      </nav>
-    </header>
-    <main class="container mt-4">
-    <div class="sidebar">
-    <h2>Controls</h2>
-    <button type="button" id="loadRequestBtn" class="sidebar-btn" data-tooltip="Load a previously saved prescription request from your computer.">Load My Prescriptions</button>
-    <input type="file" id="file-input" style="display:none" accept=".json">
-    <button type="button" id="saveRequestBtn" class="sidebar-btn" data-tooltip="Save the current prescription details to a file on your computer.">Save My Prescriptions</button>
-    <button type="button" id="clearFormBtn" class="sidebar-btn" data-tooltip="Clear all fields in the form.">Clear Form</button>
-    <button type="button" id="printSummaryBtn" class="sidebar-btn" data-tooltip="Generate a printable summary of your request.">Print Summary</button>
-  </div>
-
-  <div class="main-content" id="formContainer">
-    <form id="prescriptionForm">
-      <h1>Repeat Prescription Request</h1>
-
-      <div class="form-section" id="patientDetailsSection">
-        <h2>Patient Details</h2>
-        <label for="patientName">Full Name:</label>
-        <input type="text" id="patientName" name="name" required>
-        <label for="patientDOB">Date of Birth:</label>
-        <input type="date" id="patientDOB" name="dob" required>
-        <label for="patientAddress">Address:</label>
-        <textarea id="patientAddress" name="address" rows="3"></textarea>
-        <label for="patientEmail">Email:</label>
-        <input type="email" id="patientEmail" name="email" required>
-        <label for="patientPhone">Phone Number:</label>
-        <input type="tel" id="patientPhone" name="phone">
-        <label for="chosenPharmacy">Pharmacy:</label>
-        <select id="chosenPharmacy" name="pharmacy" required></select>
-        <label>Preferred Contact Method:</label>
-        <input type="radio" id="prefEmail" name="commPref" value="Email" checked>
-        <label for="prefEmail">Email</label>
-        <input type="radio" id="prefWhatsapp" name="commPref" value="WhatsApp">
-        <label for="prefWhatsapp">WhatsApp</label>
-      </div>
-
-      <div class="form-section">
-        <h2>Add Medication</h2>
-        <label for="medName">Medication Name:</label>
-        <input type="text" id="medName" list="medication-list">
-        <datalist id="medication-list"></datalist>
-        <label for="medDosage">Dosage (e.g., 40mg):</label>
-        <input type="text" id="medDosage">
-        <label for="medFreq">Frequency:</label>
-        <select id="medFreq"></select>
-        <button type="button" id="addMedicationBtn">Add Medication</button>
-      </div>
-
-      <div class="form-section">
-        <h2>Current Prescription List</h2>
-        <table id="medicationTable">
-          <thead>
-            <tr><th>Name</th><th>Dosage</th><th>Frequency</th><th>Action</th></tr>
-          </thead>
-          <tbody id="medicationList">
-          </tbody>
-        </table>
-      </div>
-
-      <button type="submit" style="width:100%; padding: 15px; font-size: 18px; background-color: var(--success-green);">Review and Submit Request</button>
-    </form>
-    <div id="submission-status"></div>
-  </div>
-
-  <div id="summaryModal" class="modal">
-    <div class="modal-content">
-      <span class="close-button">&times;</span>
-      <h2>Confirm Your Request</h2>
-      <div id="summaryDetails"></div>
-      <button type="button" id="confirmSubmitBtn">Confirm and Submit</button>
-      <button type="button" class="cancel-button">Cancel</button>
     </div>
-  </div>
-    </main>
-    <footer class="container mt-4 text-center">
-      <hr>
-      <p>Carndonagh Health Centre | Derry Rd, Carndonagh, County Donegal | Tel: (074) 93 74208 / (074) 93 74262</p>
-    </footer>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <div id="summaryModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Confirm Your Request</h2>
+            <div id="summaryDetails"></div>
+            <button type="button" id="confirmSubmitBtn" class="btn">Confirm and Submit</button>
+            <button type="button" class="cancel-button btn">Cancel</button>
+        </div>
+    </div>
     <script src="script.js"></script>
-  </body>
+</body>
 </html>

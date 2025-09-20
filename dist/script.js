@@ -4,6 +4,25 @@ const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyRY4uZgNAJMVf59BuZ
 
 // --- GLOBAL EVENT LISTENERS ---
 document.addEventListener('DOMContentLoaded', function() {
+    // --- NAVIGATION LOGIC ---
+    const menuToggle = document.getElementById('menu-toggle');
+    if (menuToggle) {
+        menuToggle.addEventListener('click', () => {
+            document.body.classList.toggle('sidebar-active');
+        });
+    }
+
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar) {
+        sidebar.addEventListener('click', (e) => {
+            const link = e.target.closest('a');
+            if (link && link.parentElement.classList.contains('nav-item-submenu')) {
+                e.preventDefault();
+                link.parentElement.classList.toggle('open');
+            }
+        });
+    }
+
     // --- REPLY PAGE LOGIC ---
     if (document.getElementById('reply-section')) {
         const urlParams = new URLSearchParams(window.location.search);
@@ -168,7 +187,21 @@ if (document.getElementById('prescriptionForm')) {
   const pharmacySelect = document.getElementById('chosenPharmacy');
   const freqSelect = document.getElementById('medFreq');
   // In a real application, these would likely be fetched from a server
-  const pharmacyOptions = ["Lloyds Pharmacy", "Harkin's Pharmacy", "Donagh Pharmacy", "Other"];
+  const pharmacyOptions = [
+    "Mullans Pharmacy",
+    "Carn Pharmacy",
+    "McNeill's Pharmacy",
+    "Inish Pharmacy, Carndonagh",
+    "Tierney's Healthwise Pharmacy, Buncrana",
+    "Inish Pharmacy, Buncrana",
+    "Duffy's Pharmacy, Buncrana",
+    "Brennan's Pharmacy, Buncrana",
+    "Hannon's Pharmacy, Moville",
+    "Foyle Pharmacy, Moville",
+    "Brennan's Pharmacy, Clonmany",
+    "Inish Pharmacy, Muff",
+    "OTHER"
+  ];
   const frequencyOptions = ["Once a day", "Twice a day", "Three times a day", "Four times a day", "As needed", "Every other day", "Once a week"];
   pharmacyOptions.forEach(opt => pharmacySelect.add(new Option(opt, opt)));
   frequencyOptions.forEach(opt => freqSelect.add(new Option(opt, opt)));
@@ -339,4 +372,47 @@ if (document.getElementById('prescriptionForm')) {
   const closeModal = () => summaryModal.style.display = 'none';
   closeBtn.addEventListener('click', closeModal);
   cancelBtn.addEventListener('click', closeModal);
+}
+
+// --- Appointment Booking Form Logic ---
+if (document.getElementById('bookingForm')) {
+  const bookingForm = document.getElementById('bookingForm');
+  const statusDiv = document.getElementById('submission-status');
+
+  bookingForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const submitButton = document.getElementById('submitBooking');
+    submitButton.disabled = true;
+    submitButton.textContent = 'Requesting...';
+
+    const formData = new FormData(bookingForm);
+    const data = {};
+    formData.forEach((value, key) => data[key] = value);
+    data.formType = 'appointmentBooking';
+
+    fetch(WEB_APP_URL, {
+      method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+      redirect: 'follow'
+    })
+    .then(res => res.json())
+    .then(response => {
+      if (response.status === 'success') {
+        bookingForm.style.display = 'none';
+        statusDiv.className = 'success';
+        statusDiv.innerHTML = '<h2>Thank You!</h2><p>Your appointment request has been sent. We will call you to confirm the final time and date.</p>';
+      } else {
+        throw new Error(response.message || 'An unknown error occurred.');
+      }
+    })
+    .catch(error => {
+      statusDiv.className = 'error';
+      statusDiv.innerHTML = `<strong>Error:</strong> ${error.message}. Please try again.`;
+      submitButton.disabled = false;
+      submitButton.textContent = 'Request Appointment';
+    });
+  });
 }

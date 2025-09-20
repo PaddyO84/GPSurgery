@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Appointment - Carndonagh Health Centre</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <!-- Sidebar Navigation -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html">
+                    <img src="https://images.squarespace-cdn.com/content/v1/5f7f0586bc20b071daab8716/733e2f32-5f0e-499a-96dc-c12115a531f1/Carndonagh+Health+Centre-logo.jpg?format=1500w" alt="Carndonagh Health Centre Logo" class="logo">
+                    <h3>Carndonagh Health Centre</h3>
+                </a>
+            </div>
+            <ul class="nav-list">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="services.html">Services</a></li>
+                <li><a href="book-appointment.html" class="active">Book Appointment</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content Area -->
+        <div id="content">
+            <header class="top-header">
+                <button id="menu-toggle" class="hamburger-btn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <span class="header-title">Book an Appointment</span>
+            </header>
+
+            <main class="main-content-inner">
+                <div class="container">
+                    <div class="card">
+                        <h2>Request a Non-Urgent Appointment</h2>
+                        <p>Please fill out the form below to request an appointment. We will call you back to confirm the exact time and details. This form is for non-urgent appointments only.</p>
+
+                        <form id="bookingForm">
+                            <div class="form-group">
+                                <label for="appointmentType">Type of Appointment</label>
+                                <select id="appointmentType" name="appointmentType" required>
+                                    <option value="">-- Please Select --</option>
+                                    <option value="GP Consultation">GP Consultation</option>
+                                    <option value="Nurse Visit">Nurse Visit</option>
+                                    <option value="Blood Test">Blood Test</option>
+                                    <option value="Medical Checkup">Medical Checkup</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="preferredDate">Preferred Date</label>
+                                <input type="date" id="preferredDate" name="preferredDate" required>
+                            </div>
+                             <div class="form-group">
+                                <label for="timePreference">Preferred Time</label>
+                                <select id="timePreference" name="timePreference" required>
+                                    <option value="Morning">Morning (9am - 12pm)</option>
+                                    <option value="Afternoon">Afternoon (2pm - 4pm)</option>
+                                </select>
+                            </div>
+                            <hr>
+                            <h3>Your Details</h3>
+                            <div class="form-group">
+                                <label for="bookingName">Full Name</label>
+                                <input type="text" id="bookingName" name="name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="bookingDOB">Date of Birth</label>
+                                <input type="date" id="bookingDOB" name="dob" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="bookingPhone">Phone Number</label>
+                                <input type="tel" id="bookingPhone" name="phone" required>
+                            </div>
+                             <div class="form-group">
+                                <label for="bookingEmail">Email Address</label>
+                                <input type="email" id="bookingEmail" name="email">
+                            </div>
+                            <div class="form-group">
+                                <label for="bookingNotes">Reason for Appointment (Optional)</label>
+                                <textarea id="bookingNotes" name="notes" rows="4"></textarea>
+                            </div>
+                            <button type="submit" id="submitBooking" class="btn">Request Appointment</button>
+                        </form>
+                        <div id="submission-status"></div>
+                    </div>
+                </div>
+            </main>
+
+            <footer class="main-footer">
+                <p>Carndonagh Health Centre | Derry Rd, Carndonagh, County Donegal | Tel: (074) 93 74208 / (04) 93 74262</p>
+            </footer>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -3,18 +3,10 @@ const CONFIG = {
   SHEETS: {
     PRESCRIPTIONS: "Form responses 1",
     MESSAGES: "Messages",
-    ARCHIVE: "Archive"
+    ARCHIVE: "Archive",
+    APPOINTMENTS: "Appointments"
   },
   COLUMN_MAP: {}, // Populated by initializeColumnMap()
-  // These indices are for the e.values array from onFormSubmit, based on Google Form question order.
-  FORM_SUBMIT_INDICES: {
-    EMAIL: 1,       // "Email Address"
-    PHARMACY: 2,    // "Your Usual Pharmacy"
-    NAME: 3,        // "Patient Name"
-    PHONE: 5,       // "Phone number"
-    MEDS: 7,        // "Medication Request"
-    COMM_PREF: 8,   // "Communication Preference"
-  },
   SENDER_NAME: "Carndonagh Health Centre",
   ADMIN_EMAIL: "patricknoone+surgery@gmail.com",
   STATUSES: {
@@ -41,7 +33,8 @@ function onOpen() {
   initializeColumnMap(); // Initialize dynamic column mapping
   const ui = SpreadsheetApp.getUi();
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  setupSheet(ss, CONFIG.SHEETS.MESSAGES, ["Message ID", "Timestamp", "Patient Name", "Patient DOB", "Patient Email", "Initial Message", "Conversation History", "Status", "Last Updated"]);
+  setupSheet(ss, CONFIG.SHEETS.MESSAGES, ["Message ID", "Timestamp", "Patient Name", "Patient DOB", "Patient Email", "Recipient", "Initial Message", "Conversation History", "Status", "Last Updated"]);
+  setupSheet(ss, CONFIG.SHEETS.APPOINTMENTS, ["Booking ID", "Timestamp", "Patient Name", "DOB", "Phone", "Email", "Appointment Type", "Preferred Date", "Preferred Time", "Notes", "Status"]);
 
   const menu = ui.createMenu('Surgery Tools');
   const prescriptionMenu = ui.createMenu('Prescriptions');
@@ -75,6 +68,7 @@ function doPost(e) {
       case 'newMessage': handleNewMessage(data); break;
       case 'replyMessage': handlePatientReply(data); break;
       case 'prescriptionSubmission': handlePrescriptionSubmission(data); break;
+      case 'appointmentBooking': handleAppointmentBooking(data); break;
       default: throw new Error("Invalid form type submitted.");
     }
     return ContentService.createTextOutput(JSON.stringify({ status: 'success' })).setMimeType(ContentService.MimeType.JSON);
@@ -84,25 +78,39 @@ function doPost(e) {
   }
 }
 
-function onEdit(e) {
-  try {
-    const range = e.range;
-    const sheet = range.getSheet();
-    if (sheet.getName() !== CONFIG.SHEETS.PRESCRIPTIONS || !CONFIG.COLUMN_MAP.PRESCRIPTIONS || range.getColumn() !== CONFIG.COLUMN_MAP.PRESCRIPTIONS.STATUS || range.getRow() < 2) return;
-    const status = range.getValue().toString().trim();
-    if (status === CONFIG.STATUSES.READY) {
-      const commPref = sheet.getRange(range.getRow(), CONFIG.COLUMN_MAP.PRESCRIPTIONS.COMMUNICATION_PREFERENCE).getValue().toLowerCase();
-      if (commPref === CONFIG.STATUSES.COMM_WHATSAPP) {
-        sendWhatsAppLinkToStaff(range.getRow());
-      } else {
-        sendReadyEmail(range.getRow());
-      }
-    } else if (status === CONFIG.STATUSES.QUERY) {
-      sendQueryEmail(range.getRow());
-    }
-  } catch (err) {
-    reportError('onEdit', err, e.range ? e.range.getRow() : null);
-  }
+function handleAppointmentBooking(data) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.SHEETS.APPOINTMENTS);
+  const newRow = sheet.getLastRow() + 1;
+  const bookingId = `BK-${newRow}`;
+  const timestamp = new Date();
+
+  const newRowData = [
+    bookingId,
+    timestamp,
+    data.name,
+    data.dob,
+    data.phone,
+    data.email,
+    data.appointmentType,
+    data.preferredDate,
+    data.timePreference,
+    data.notes,
+    "Pending Confirmation" // Initial status
+  ];
+  sheet.appendRow(newRowData);
+
+  const subject = `New Appointment Request [${bookingId}] from ${data.name}`;
+  const body = `<p>A new appointment request has been submitted.</p>
+                <p><strong>Name:</strong> ${escapeHtml(data.name)}</p>
+                <p><strong>Phone:</strong> ${escapeHtml(data.phone)}</p>
+                <p><strong>Appointment Type:</strong> ${escapeHtml(data.appointmentType)}</p>
+                <p><strong>Preferred Date:</strong> ${escapeHtml(data.preferredDate)} (${escapeHtml(data.timePreference)})</p>
+                <hr>
+                <p><strong>Notes:</strong></p>
+                <p style="white-space: pre-wrap;">${escapeHtml(data.notes)}</p>
+                <hr>
+                <p>Logged in "Appointments" sheet, row ${newRow}.</p>`;
+  sendEmail(CONFIG.ADMIN_EMAIL, subject, body);
 }
 
 /**
@@ -177,9 +185,32 @@ function handleNewMessage(data) {
   const newRow = messagesSheet.getLastRow() + 1;
   const messageId = `MSG-${newRow}`;
   const timestamp = Utilities.formatDate(new Date(), "Europe/Dublin", "dd/MM/yyyy HH:mm:ss");
-  messagesSheet.appendRow([messageId, timestamp, data.patientName, data.dob, data.email, data.message, "", CONFIG.STATUSES.NEW, timestamp]);
-  const subject = `New Patient Message [${messageId}] from ${data.patientName}`;
-  const body = `<p>A new message has been submitted.</p><p><strong>From:</strong> ${escapeHtml(data.patientName)} (${escapeHtml(data.email)})</p><p><strong>DOB:</strong> ${escapeHtml(data.dob)}</p><hr><p><strong>Message:</strong></p><p style="white-space: pre-wrap;">${escapeHtml(data.message)}</p><hr><p>Logged in "Messages" sheet, row ${newRow}.</p>`;
+
+  // New row data with recipient
+  const newRowData = [
+    messageId,
+    timestamp,
+    data.patientName,
+    data.dob,
+    data.email,
+    data.recipient, // Added recipient
+    data.message,
+    "", // Conversation History
+    CONFIG.STATUSES.NEW,
+    timestamp
+  ];
+  messagesSheet.appendRow(newRowData);
+
+  const subject = `New Patient Message [${messageId}] from ${data.patientName} for ${data.recipient}`;
+  const body = `<p>A new message has been submitted.</p>
+                <p><strong>To:</strong> ${escapeHtml(data.recipient)}</p>
+                <p><strong>From:</strong> ${escapeHtml(data.patientName)} (${escapeHtml(data.email)})</p>
+                <p><strong>DOB:</strong> ${escapeHtml(data.dob)}</p>
+                <hr>
+                <p><strong>Message:</strong></p>
+                <p style="white-space: pre-wrap;">${escapeHtml(data.message)}</p>
+                <hr>
+                <p>Logged in "Messages" sheet, row ${newRow}.</p>`;
   sendEmail(CONFIG.ADMIN_EMAIL, subject, body);
 }
 
