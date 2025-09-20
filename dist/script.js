@@ -1,6 +1,6 @@
 // --- CONFIGURATION ---
 // IMPORTANT: Replace this with your actual Web App URL from Google Apps Script deployment.
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz33KGLEwn6Ao4HN4JqitTCgQcqdQs-5gNHBNR714XtQMh_fAjCLHU2IVMrceDR5CAxRw/exec';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwEQ1DO1-BM_jmKvd_9xBUBjG7KVsgwwnwljOdju2h8mVimZfLn0DFdJfh84OeGXxq10A/exec';
 
 // --- GLOBAL EVENT LISTENERS ---
 document.addEventListener('DOMContentLoaded', function() {
