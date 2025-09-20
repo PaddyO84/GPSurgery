@@ -62,7 +62,22 @@ function doGet(e) {
 }
 
 function doPost(e) {
-  Logger.log(e.postData.contents);
+  Logger.log('doPost started.');
+  if (!e) {
+    Logger.log('Error: event object "e" is missing.');
+    return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: 'Event object not received.' })).setMimeType(ContentService.MimeType.JSON);
+  }
+  if (!e.postData) {
+    Logger.log('Error: e.postData is missing.');
+    return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: 'postData not received.' })).setMimeType(ContentService.MimeType.JSON);
+  }
+  if (!e.postData.contents) {
+    Logger.log('Error: e.postData.contents is missing.');
+    return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: 'postData contents not received.' })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  Logger.log('Payload received: ' + e.postData.contents);
+
   try {
     const data = JSON.parse(e.postData.contents);
     switch (data.formType) {
