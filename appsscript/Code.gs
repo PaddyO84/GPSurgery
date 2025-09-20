@@ -62,6 +62,7 @@ function doGet(e) {
 }
 
 function doPost(e) {
+  Logger.log(e.postData.contents);
   try {
     const data = JSON.parse(e.postData.contents);
     switch (data.formType) {
