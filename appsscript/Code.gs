@@ -62,6 +62,7 @@ function doGet(e) {
 }
 
 function doPost(e) {
+  Logger.log(e.postData.contents);
   try {
     // ADDED THIS LINE FOR DEBUGGING:
     Logger.log(JSON.stringify(e, null, 2)); 
