@@ -85,7 +85,7 @@ if (messageForm) {
         method: 'POST',
         mode: 'cors',
         cache: 'no-cache',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(data),
         redirect: 'follow'
       })
@@ -139,7 +139,7 @@ if (replyForm) {
         method: 'POST',
         mode: 'cors',
         cache: 'no-cache',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(data),
         redirect: 'follow'
       })
@@ -348,7 +348,7 @@ if (document.getElementById('prescriptionForm')) {
       method: 'POST',
       mode: 'cors',
       cache: 'no-cache',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(payload),
       redirect: 'follow'
     })
