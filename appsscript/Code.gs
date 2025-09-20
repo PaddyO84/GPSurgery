@@ -78,6 +78,13 @@ function doPost(e) {
   }
 }
 
+function doOptions(e) {
+  return ContentService.createTextOutput()
+    .addHttpHeader("Access-Control-Allow-Origin", "*")
+    .addHttpHeader("Access-Control-Allow-Methods", "POST, OPTIONS")
+    .addHttpHeader("Access-Control-Allow-Headers", "Content-Type");
+}
+
 function handleAppointmentBooking(data) {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.SHEETS.APPOINTMENTS);
   const newRow = sheet.getLastRow() + 1;
