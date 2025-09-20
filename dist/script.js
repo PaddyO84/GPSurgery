@@ -394,7 +394,7 @@ if (document.getElementById('bookingForm')) {
       method: 'POST',
       mode: 'cors',
       cache: 'no-cache',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
       redirect: 'follow'
     })
