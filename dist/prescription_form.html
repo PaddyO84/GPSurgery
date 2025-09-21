@@ -12,31 +12,11 @@
 <body>
     <div class="page-wrapper">
         <!-- Sidebar Navigation -->
-        <nav id="sidebar">
-            <div class="sidebar-header">
-                <a href="index.html">
-                    <img src="https://images.squarespace-cdn.com/content/v1/5f7f0586bc20b071daab8716/733e2f32-5f0e-499a-96dc-c12115a531f1/Carndonagh+Health+Centre-logo.jpg?format=1500w" alt="Carndonagh Health Centre Logo" class="logo">
-                    <h3>Carndonagh Health Centre</h3>
-                </a>
-            </div>
-            <ul class="nav-list">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="services.html">Services</a></li>
-                <li><a href="book-appointment.html">Book Appointment</a></li>
-                <li><a href="contact.html">Contact</a></li>
-            </ul>
-        </nav>
+        <nav id="sidebar" data-include="_sidebar.html"></nav>
 
         <!-- Main Content Area -->
         <div id="content">
-            <header class="top-header">
-                <button id="menu-toggle" class="hamburger-btn">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
-                <span class="header-title">Repeat Prescription Request</span>
-            </header>
+            <div data-include="_header.html"></div>
 
             <main class="main-content-inner">
                 <div class="container-fluid d-flex"> <!-- Using a fluid container for this complex layout -->
@@ -82,9 +62,7 @@
                 </div>
             </main>
 
-            <footer class="main-footer">
-                <p>Carndonagh Health Centre | Derry Rd, Carndonagh, County Donegal | Tel: (074) 93 74208 / (074) 93 74262</p>
-            </footer>
+            <div data-include="_footer.html"></div>
         </div>
     </div>
 

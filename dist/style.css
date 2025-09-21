@@ -301,6 +301,33 @@ ul {
     color: #004085;
 }
 
+/* --- SUBMISSION STATUS STYLES --- */
+#submission-status {
+    display: none; /* Hidden by default */
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+}
+#submission-status.submitting {
+    display: block;
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+    color: #495057;
+}
+#submission-status.success {
+    display: block;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+#submission-status.error {
+    display: block;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
 /* --- MISC COMPONENT STYLES --- */
 .history-box {
     background-color: #f8f9fa;
