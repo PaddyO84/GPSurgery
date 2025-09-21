@@ -62,11 +62,6 @@ function doGet(e) {
 }
 
 function doPost(e) {
-  // Pre-flight check for CORS
-  if (e.postData && e.postData.type === 'application/json' && e.postData.contents === 'OPTIONS') {
-    return doOptions(e);
-  }
-
   let data;
   try {
     // Check if the necessary properties exist
