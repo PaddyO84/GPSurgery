@@ -116,10 +116,11 @@ function doPost(e) {
 }
 
 function doOptions(e) {
-  return ContentService.createTextOutput()
+  return ContentService.createTextOutput(JSON.stringify({}))
+    .setMimeType(ContentService.MimeType.JSON)
     .addHttpHeader("Access-Control-Allow-Origin", "https://paddyo84.github.io")
-    .addHttpHeader("Access-Control-Allow-Methods", "POST, OPTIONS")
-    .addHttpHeader("Access-Control-Allow-Headers", "Content-Type");
+    .addHttpHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+    .addHttpHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
 }
 
 function handleAppointmentBooking(data) {
