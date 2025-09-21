@@ -62,38 +62,61 @@ function doGet(e) {
 }
 
 function doPost(e) {
-  Logger.log('doPost started.');
-  if (!e) {
-    Logger.log('Error: event object "e" is missing.');
-    return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: 'Event object not received.' })).setMimeType(ContentService.MimeType.JSON);
-  }
-  if (!e.postData) {
-    Logger.log('Error: e.postData is missing.');
-    return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: 'postData not received.' })).setMimeType(ContentService.MimeType.JSON);
-  }
-  if (!e.postData.contents) {
-    Logger.log('Error: e.postData.contents is missing.');
-    return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: 'postData contents not received.' })).setMimeType(ContentService.MimeType.JSON);
+  // Pre-flight check for CORS
+  if (e.postData && e.postData.type === 'application/json' && e.postData.contents === 'OPTIONS') {
+    return doOptions(e);
   }
 
-  Logger.log('Payload received: ' + e.postData.contents);
-
+  let data;
   try {
-    // ADDED THIS LINE FOR DEBUGGING:
-    Logger.log(JSON.stringify(e, null, 2)); 
-
-    const data = JSON.parse(e.postData.contents);
-    switch (data.formType) {
-      case 'newMessage': handleNewMessage(data); break;
-      case 'replyMessage': handlePatientReply(data); break;
-      default: throw new Error("Invalid form type submitted.");
+    // Check if the necessary properties exist
+    if (!e || !e.postData || !e.postData.contents) {
+      throw new Error("Invalid request - missing data.");
     }
-    return ContentService.createTextOutput(JSON.stringify({ status: 'success' })).setMimeType(ContentService.MimeType.JSON);
+
+    // Parse the JSON data from the request body
+    data = JSON.parse(e.postData.contents);
+
+    // Check if formType is specified
+    if (!data.formType) {
+      throw new Error("Invalid request - missing formType.");
+    }
+
+    // Log the received data for debugging
+    Logger.log(`Received formType: ${data.formType} with data: ${JSON.stringify(data)}`);
+
+    // Route to the appropriate handler based on the formType
+    switch (data.formType) {
+      case 'newMessage':
+        handleNewMessage(data);
+        break;
+      case 'replyMessage':
+        handlePatientReply(data);
+        break;
+      case 'appointmentBooking':
+        handleAppointmentBooking(data);
+        break;
+      case 'prescriptionSubmission':
+        handlePrescriptionSubmission(data);
+        break;
+      default:
+        throw new Error(`Invalid form type submitted: ${data.formType}`);
+    }
+
+    // Return a success response
+    return ContentService.createTextOutput(JSON.stringify({ status: 'success' }))
+                         .setMimeType(ContentService.MimeType.JSON);
+
   } catch (err) {
+    // Log the error for debugging
+    Logger.log(`Error in doPost: ${err.message}\nStack: ${err.stack}`);
+
+    // Report the error
     reportError('doPost', err, null);
-    // Log the detailed error so it appears in Executions
-    Logger.log(`Error in doPost: ${err.name} - ${err.message}\nStack: ${err.stack}`);
-    return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: err.message })).setMimeType(ContentService.MimeType.JSON);
+
+    // Return an error response
+    return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: err.message }))
+                         .setMimeType(ContentService.MimeType.JSON);
   }
 }
 
@@ -105,38 +128,46 @@ function doOptions(e) {
 }
 
 function handleAppointmentBooking(data) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.SHEETS.APPOINTMENTS);
-  const newRow = sheet.getLastRow() + 1;
-  const bookingId = `BK-${newRow}`;
-  const timestamp = new Date();
+  try {
+    Logger.log(`Handling appointment booking for: ${data.name}`);
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.SHEETS.APPOINTMENTS);
+    const newRow = sheet.getLastRow() + 1;
+    const bookingId = `BK-${newRow}`;
+    const timestamp = new Date();
 
-  const newRowData = [
-    bookingId,
-    timestamp,
-    data.name,
-    data.dob,
-    data.phone,
-    data.email,
-    data.appointmentType,
-    data.preferredDate,
-    data.timePreference,
-    data.notes,
-    "Pending Confirmation" // Initial status
-  ];
-  sheet.appendRow(newRowData);
+    const newRowData = [
+      bookingId,
+      timestamp,
+      data.name,
+      data.dob,
+      data.phone,
+      data.email,
+      data.appointmentType,
+      data.preferredDate,
+      data.timePreference,
+      data.notes,
+      "Pending Confirmation" // Initial status
+    ];
+    sheet.appendRow(newRowData);
 
-  const subject = `New Appointment Request [${bookingId}] from ${data.name}`;
-  const body = `<p>A new appointment request has been submitted.</p>
-                <p><strong>Name:</strong> ${escapeHtml(data.name)}</p>
-                <p><strong>Phone:</strong> ${escapeHtml(data.phone)}</p>
-                <p><strong>Appointment Type:</strong> ${escapeHtml(data.appointmentType)}</p>
-                <p><strong>Preferred Date:</strong> ${escapeHtml(data.preferredDate)} (${escapeHtml(data.timePreference)})</p>
-                <hr>
-                <p><strong>Notes:</strong></p>
-                <p style="white-space: pre-wrap;">${escapeHtml(data.notes)}</p>
-                <hr>
-                <p>Logged in "Appointments" sheet, row ${newRow}.</p>`;
-  sendEmail(CONFIG.ADMIN_EMAIL, subject, body);
+    const subject = `New Appointment Request [${bookingId}] from ${data.name}`;
+    const body = `<p>A new appointment request has been submitted.</p>
+                  <p><strong>Name:</strong> ${escapeHtml(data.name)}</p>
+                  <p><strong>Phone:</strong> ${escapeHtml(data.phone)}</p>
+                  <p><strong>Appointment Type:</strong> ${escapeHtml(data.appointmentType)}</p>
+                  <p><strong>Preferred Date:</strong> ${escapeHtml(data.preferredDate)} (${escapeHtml(data.timePreference)})</p>
+                  <hr>
+                  <p><strong>Notes:</strong></p>
+                  <p style="white-space: pre-wrap;">${escapeHtml(data.notes)}</p>
+                  <hr>
+                  <p>Logged in "Appointments" sheet, row ${newRow}.</p>`;
+    sendEmail(CONFIG.ADMIN_EMAIL, subject, body);
+    Logger.log(`Successfully booked appointment for: ${data.name}`);
+  } catch (err) {
+    Logger.log(`Error in handleAppointmentBooking: ${err.message}\nStack: ${err.stack}`);
+    reportError('handleAppointmentBooking', err, null);
+    throw err; // Re-throw the error to be caught by doPost
+  }
 }
 
 /**
@@ -200,8 +231,8 @@ function parseMedicationString(medicationsRaw) {
     // Ensure all parts are defined, default to empty string if not
     const medName = details[0] || '';
     const dosage = details[1] || '';
-    const quantity = details[2] || '';
-    return `${medName} - ${dosage} (${quantity})`;
+    const frequency = details[2] || ''; // Changed from quantity to frequency
+    return `${medName} - ${dosage} (${frequency})`;
   }).join("\n");
 }
 

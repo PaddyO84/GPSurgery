@@ -1,7 +1,3 @@
-// --- CONFIGURATION ---
-// IMPORTANT: Replace this with your actual Web App URL from Google Apps Script deployment.
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyq3u_wwz3N4EW4n6ZHMeg5BO1tiWGRiUA7KQtix8W_eMzCBOq956aoFsjIHsAdZ9qB/exec';
-
 // --- GLOBAL EVENT LISTENERS ---
 document.addEventListener('DOMContentLoaded', function() {
     // --- NAVIGATION LOGIC ---
@@ -85,7 +81,7 @@ if (messageForm) {
         method: 'POST',
         mode: 'cors',
         cache: 'no-cache',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
         redirect: 'follow'
       })
@@ -139,7 +135,7 @@ if (replyForm) {
         method: 'POST',
         mode: 'cors',
         cache: 'no-cache',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
         redirect: 'follow'
       })
@@ -348,7 +344,7 @@ if (document.getElementById('prescriptionForm')) {
       method: 'POST',
       mode: 'cors',
       cache: 'no-cache',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
       redirect: 'follow'
     })
