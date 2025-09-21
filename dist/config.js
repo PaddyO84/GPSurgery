@@ -1,3 +1,3 @@
 // --- CONFIGURATION ---
 // IMPORTANT: Replace this with your actual Web App URL from Google Apps Script deployment.
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwGzBWv5JSaP8koxgHqd8bxQwE5ElxUaxibOc1eoDUJcztsJzDj48eVIYwt7h3ZhZuu/exec';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzYi9fi447P3K50gckYxKsxkG8rPH6SfaBizcREvGk2LZVFjBRB86E2eN-6emuqPWuekg/exec';
