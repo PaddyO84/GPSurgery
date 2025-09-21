@@ -117,7 +117,7 @@ function doPost(e) {
 
 function doOptions(e) {
   return ContentService.createTextOutput()
-    .addHttpHeader("Access-Control-Allow-Origin", "*")
+    .addHttpHeader("Access-Control-Allow-Origin", "https://paddyo84.github.io")
     .addHttpHeader("Access-Control-Allow-Methods", "POST, OPTIONS")
     .addHttpHeader("Access-Control-Allow-Headers", "Content-Type");
 }
