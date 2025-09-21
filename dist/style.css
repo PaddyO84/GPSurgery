@@ -1,0 +1,416 @@
+/* --- VARIABLES & BASIC SETUP --- */
+:root {
+    --primary-color: #005A9C; /* A professional blue */
+    --secondary-color: #007bff; /* A slightly brighter blue for links/hovers */
+    --accent-color: #28a745;  /* A friendly green for success/accents */
+    --text-color: #333333;
+    --bg-color: #f8f9fa; /* Light grey background */
+    --surface-color: #ffffff; /* For cards and other surfaces */
+    --border-color: #dee2e6;
+    --sidebar-width: 260px;
+    --header-height: 60px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Lato', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-size: 16px;
+}
+
+a {
+    color: var(--secondary-color);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+ul {
+    list-style: none;
+}
+
+/* --- MAIN LAYOUT --- */
+.page-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+#sidebar {
+    width: var(--sidebar-width);
+    background: var(--primary-color);
+    color: #fff;
+    position: fixed;
+    height: 100%;
+    left: calc(-1 * var(--sidebar-width)); /* Hidden by default on mobile */
+    transition: left 0.3s ease;
+    z-index: 1000;
+}
+
+#content {
+    width: 100%;
+    transition: margin-left 0.3s ease;
+}
+
+/* --- SIDEBAR STYLES --- */
+.sidebar-header {
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.sidebar-header .logo {
+    max-width: 80px;
+    margin-bottom: 10px;
+}
+.sidebar-header h3 {
+    font-size: 1.2rem;
+    color: #fff;
+}
+
+.nav-list {
+    padding: 15px 0;
+}
+.nav-list a {
+    display: block;
+    padding: 12px 20px;
+    color: #fff;
+    font-size: 1.1rem;
+    transition: background 0.2s ease;
+}
+.nav-list a:hover {
+    background: var(--secondary-color);
+    text-decoration: none;
+}
+.submenu {
+    display: none; /* Hidden by default */
+    background: rgba(0, 0, 0, 0.2);
+    padding-left: 20px;
+}
+.submenu a {
+    font-size: 1rem;
+    padding-left: 30px;
+}
+.nav-item-submenu.open > .submenu {
+    display: block; /* Show on toggle */
+}
+
+.nav-list .active {
+    background: var(--secondary-color);
+    font-weight: 700;
+}
+
+/* --- UTILITY CLASSES --- */
+.text-danger {
+    color: #dc3545; /* A standard danger red color */
+    font-weight: 700;
+}
+
+/* --- HEADER STYLES --- */
+.top-header {
+    height: var(--header-height);
+    background: var(--surface-color);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    position: sticky;
+    top: 0;
+    z-index: 900;
+}
+.hamburger-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+}
+.hamburger-btn span {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background: var(--text-color);
+    margin: 5px 0;
+    transition: all 0.3s ease;
+}
+.header-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-left: 15px;
+}
+
+/* --- CONTENT STYLES --- */
+.main-content-inner {
+    padding: 30px;
+}
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+.card {
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.card h2 {
+    margin-top: 0;
+    font-size: 1.5rem;
+    color: var(--primary-color);
+}
+
+/* --- FOOTER STYLES --- */
+.main-footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 0.9rem;
+    color: #6c757d;
+    border-top: 1px solid var(--border-color);
+}
+
+/* --- RESPONSIVE & ACTIVE STATES --- */
+
+/* Sidebar active state for mobile */
+.sidebar-active #sidebar {
+    left: 0;
+}
+.sidebar-active #content {
+    /* Optional: Add an overlay or prevent scrolling */
+}
+
+/* Desktop styles */
+@media (min-width: 992px) {
+    #sidebar {
+        left: 0; /* Always visible */
+    }
+    #content {
+        margin-left: var(--sidebar-width);
+        width: calc(100% - var(--sidebar-width));
+    }
+    .top-header {
+        display: none; /* Hide mobile header on desktop */
+    }
+}
+
+/* --- FORM STYLES --- */
+.form-group {
+    margin-bottom: 20px;
+}
+.form-group label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="tel"],
+.form-group input[type="date"],
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 1rem;
+    font-family: 'Lato', sans-serif;
+}
+.form-group textarea {
+    resize: vertical;
+}
+
+/* --- BUTTON STYLES --- */
+.btn {
+    display: inline-block;
+    background-color: var(--primary-color);
+    color: #fff;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.2s ease;
+}
+.btn:hover {
+    background-color: var(--secondary-color);
+    text-decoration: none;
+    color: #fff;
+}
+
+/* --- ALERT STYLES --- */
+.alert {
+    padding: 20px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    margin-bottom: 20px;
+}
+.alert.alert-warning {
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+    color: #856404;
+}
+.alert h4 {
+    margin-top: 0;
+    color: inherit;
+}
+
+/* --- TABLE STYLES --- */
+.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 1rem;
+}
+.styled-table thead tr {
+    background-color: var(--primary-color);
+    color: #ffffff;
+    text-align: left;
+}
+.styled-table th,
+.styled-table td {
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+}
+.styled-table tbody tr {
+    border-bottom: 1px solid var(--border-color);
+}
+.styled-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+.styled-table tbody tr:last-of-type {
+    border-bottom: 2px solid var(--primary-color);
+}
+.styled-table .section-header {
+    background-color: #e9ecef;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+/* --- More Alert Styles --- */
+.alert.alert-info {
+    background-color: #cce5ff;
+    border-color: #b8daff;
+    color: #004085;
+}
+
+/* --- SUBMISSION STATUS STYLES --- */
+#submission-status {
+    display: none; /* Hidden by default */
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+}
+#submission-status.submitting {
+    display: block;
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+    color: #495057;
+}
+#submission-status.success {
+    display: block;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+#submission-status.error {
+    display: block;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+/* --- MISC COMPONENT STYLES --- */
+.history-box {
+    background-color: #f8f9fa;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 15px;
+    margin-top: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+    white-space: pre-wrap; /* To respect newlines in the text */
+}
+
+/* --- Prescription Form Specific Styles --- */
+.container-fluid {
+    width: 100%;
+    padding: 0;
+}
+.d-flex {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping on small screens */
+}
+.sidebar-controls {
+    flex: 0 0 220px; /* Fixed width for the controls sidebar */
+    padding-right: 20px;
+}
+.sidebar-controls h2 {
+    font-size: 1.3rem;
+    color: var(--primary-color);
+}
+.sidebar-btn {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #e9ecef;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    text-align: left;
+    cursor: pointer;
+}
+.form-container {
+    flex: 1; /* Takes up the remaining space */
+}
+.btn-full-width {
+    width: 100%;
+}
+
+/* --- Modal Styles --- */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1001;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+.modal-content {
+    background-color: #fefefe;
+    margin: 10% auto;
+    padding: 25px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 600px;
+    border-radius: 8px;
+    position: relative;
+}
+.close-button {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .sidebar-controls {
+        flex: 1 1 100%; /* Full width on mobile */
+        padding-right: 0;
+        margin-bottom: 20px;
+    }
+}

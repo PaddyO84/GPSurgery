@@ -58,67 +58,63 @@ function doGet(e) {
   }
 
   // Return a default response for other GET requests
-  return ContentService.createTextOutput(JSON.stringify({ status: 'success', message: 'API is running' })).setMimeType(ContentService.MimeType.JSON);
+  return createJsonResponse({ status: 'success', message: 'API is running' });
 }
 
 function doPost(e) {
   let data;
   try {
-    // Check if the necessary properties exist
     if (!e || !e.postData || !e.postData.contents) {
-      throw new Error("Invalid request - missing data.");
+      throw new Error("Invalid POST request: No data received.");
     }
-    
-    // Parse the JSON data from the request body
-    data = JSON.parse(e.postData.contents);
-    
-    // Check if formType is specified
-    if (!data.formType) {
-      throw new Error("Invalid request - missing formType.");
-    }
-    
-    // Log the received data for debugging
-    Logger.log(`Received formType: ${data.formType} with data: ${JSON.stringify(data)}`);
 
-    // Route to the appropriate handler based on the formType
-    switch (data.formType) {
-      case 'newMessage':
-        handleNewMessage(data);
-        break;
-      case 'replyMessage':
-        handlePatientReply(data);
-        break;
-      case 'appointmentBooking':
-        handleAppointmentBooking(data);
-        break;
-      case 'prescriptionSubmission':
-        handlePrescriptionSubmission(data);
-        break;
-      default:
-        throw new Error(`Invalid form type submitted: ${data.formType}`);
+    data = JSON.parse(e.postData.contents);
+    const formType = data.formType;
+
+    if (!formType) {
+      throw new Error("Invalid request: 'formType' is missing.");
     }
-    
-    // Return a success response
-    return ContentService.createTextOutput(JSON.stringify({ status: 'success' }))
-                         .setMimeType(ContentService.MimeType.JSON);
+
+    Logger.log(`Received formType: '${formType}' with data: ${JSON.stringify(data)}`);
+
+    // Router to handle different form types.
+    const formHandlers = {
+      'newMessage': handleNewMessage,
+      'replyMessage': handlePatientReply,
+      'appointmentBooking': handleAppointmentBooking,
+      'prescriptionSubmission': handlePrescriptionSubmission
+    };
+
+    const handler = formHandlers[formType];
+
+    if (handler) {
+      handler(data);
+      return createJsonResponse({ status: 'success', message: `Form '${formType}' processed successfully.` });
+    } else {
+      throw new Error(`Invalid formType: '${formType}' is not a recognized type.`);
+    }
 
   } catch (err) {
-    // Log the error for debugging
     Logger.log(`Error in doPost: ${err.message}\nStack: ${err.stack}`);
-    
-    // Report the error
-    reportError('doPost', err, null);
-    
-    // Return an error response
-    return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: err.message }))
-                         .setMimeType(ContentService.MimeType.JSON);
+    reportError('doPost', err, { data: data }); // Pass received data for context
+    return createJsonResponse({ status: 'error', message: err.message });
   }
 }
 
+/**
+ * Handles CORS preflight requests (OPTIONS).
+ * This is crucial for allowing cross-origin requests from the web app.
+ * For development, this is set to allow all origins ('*').
+ * For production, you should restrict this to the specific domain where your web app is hosted
+ * to enhance security (e.g., "https://your-username.github.io").
+ *
+ * @param {Object} e The event parameter for the OPTIONS request.
+ * @returns {GoogleAppsScript.Content.TextOutput} A TextOutput object with the appropriate CORS headers.
+ */
 function doOptions(e) {
-  return ContentService.createTextOutput(JSON.stringify({}))
+  return ContentService.createTextOutput()
     .setMimeType(ContentService.MimeType.JSON)
-    .addHttpHeader("Access-Control-Allow-Origin", "https://paddyo84.github.io")
+    .addHttpHeader("Access-Control-Allow-Origin", "*") // WARNING: More permissive for development.
     .addHttpHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
     .addHttpHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
 }
@@ -161,7 +157,7 @@ function handleAppointmentBooking(data) {
     Logger.log(`Successfully booked appointment for: ${data.name}`);
   } catch (err) {
     Logger.log(`Error in handleAppointmentBooking: ${err.message}\nStack: ${err.stack}`);
-    reportError('handleAppointmentBooking', err, null);
+    reportError('handleAppointmentBooking', err, { data: data });
     throw err; // Re-throw the error to be caught by doPost
   }
 }
@@ -324,7 +320,7 @@ function sendReplyFromSheet(messageId, replyText) {
     const body = `<p>Dear ${escapeHtml(patientName)},</p><p>A member of our staff has replied:</p><div style=\"background-color:#f4f4f4;padding:15px;border-left:4px solid #009cde;\">${escapeHtml(replyText)}</div><p>If you need to reply, please use the secure link below. **Do not reply to this email.**</p><p><a href=\"${replyLink}\">Click Here to Send a Secure Reply</a></p><br><p>Thank you,<br><strong>${CONFIG.SENDER_NAME}</strong></p><hr>${CONFIG.FOOTER}`;
     sendEmail(patientEmail, subject, body, { name: CONFIG.SENDER_NAME });
   } catch (err) {
-    reportError('sendReplyFromSheet', err, null);
+    reportError('sendReplyFromSheet', err, { messageId: messageId });
     throw err;
   }
 }
@@ -358,7 +354,7 @@ function getConversationData(messageId) {
 
     return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
-    reportError('getConversationData', err, null);
+    reportError('getConversationData', err, { messageId: messageId });
     return ContentService.createTextOutput(JSON.stringify({ error: 'An error occurred while fetching conversation data.' })).setMimeType(ContentService.MimeType.JSON);
   }
 }
@@ -533,15 +529,36 @@ function sendErrorReport(subject, body) {
     }
 }
 
-function reportError(functionName, error, row) {
+function reportError(functionName, error, context = {}) {
     const subject = `Script Error: ${functionName}`;
     const timestamp = Utilities.formatDate(new Date(), "Europe/Dublin", "dd/MM/yyyy HH:mm:ss");
     let body = `An error occurred in <strong>${functionName}</strong> at ${timestamp}.`;
-    if (row) {
-        body += `<br><br>Related to row <strong>${row}</strong>.`;
+
+    if (context.row) {
+        body += `<br><br>Related to row <strong>${context.row}</strong>.`;
     }
+    if (context.data) {
+        body += `<br><br>Received Data: <pre>${JSON.stringify(context.data, null, 2)}</pre>`;
+    }
+    if (context.messageId) {
+        body += `<br><br>Related to Message ID: <strong>${context.messageId}</strong>.`;
+    }
+    if (context.recipient) {
+      body += `<br><br>Related to Recipient: <strong>${context.recipient}</strong>.`;
+    }
+
     body += `<br><br><strong>Error Details:</strong><br>Name: ${error.name}<br>Message: ${error.message}<br>Stack Trace:<br>${(error.stack || '').replace(/\n/g, "<br>")}`;
     sendErrorReport(subject, body);
+}
+
+/**
+ * Creates a JSON response with appropriate headers.
+ * @param {Object} payload The JavaScript object to stringify.
+ * @returns {GoogleAppsScript.Content.TextOutput} A TextOutput object.
+ */
+function createJsonResponse(payload) {
+  return ContentService.createTextOutput(JSON.stringify(payload))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 function escapeHtml(unsafe) {
@@ -564,7 +581,7 @@ function sendEmail(recipient, subject, htmlBody, options) {
     MailApp.sendEmail(recipient, subject, "", finalOptions);
   } catch (e) {
     if (recipient !== CONFIG.ADMIN_EMAIL) {
-      reportError(`sendEmail to ${recipient}`, e, null);
+      reportError('sendEmail', e, { recipient: recipient });
     } else {
       Logger.log(`Failed to send email to admin. Error: ${e.message}`);
     }
