@@ -191,18 +191,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // --- Prescription Form Logic (from prescription_form.html) ---
         const prescriptionForm = document.getElementById('prescriptionForm');
         if (prescriptionForm) {
-          const addMedicationBtn = document.getElementById('addMedicationBtn');
-          const medicationList = document.getElementById('medicationList');
-          const summaryModal = document.getElementById('summaryModal');
-          const confirmSubmitBtn = document.getElementById('confirmSubmitBtn');
-          const cancelBtn = summaryModal.querySelector('.cancel-button');
-          const closeBtn = summaryModal.querySelector('.close-button');
-          const statusDiv = document.getElementById('submission-status');
-
-          // --- Dropdown Population ---
+          // --- Dropdown Population (Moved to top for robustness) ---
           const pharmacySelect = document.getElementById('chosenPharmacy');
           const freqSelect = document.getElementById('medFreq');
-          
           if (pharmacySelect && freqSelect) {
               const pharmacyOptions = [
                 "Mullans Pharmacy", "Carn Pharmacy", "McNeill's Pharmacy", "Inish Pharmacy, Carndonagh",
@@ -215,6 +206,15 @@ document.addEventListener('DOMContentLoaded', function() {
               pharmacyOptions.forEach(opt => pharmacySelect.add(new Option(opt, opt)));
               frequencyOptions.forEach(opt => freqSelect.add(new Option(opt, opt)));
           }
+
+          // --- Get other elements ---
+          const addMedicationBtn = document.getElementById('addMedicationBtn');
+          const medicationList = document.getElementById('medicationList');
+          const summaryModal = document.getElementById('summaryModal');
+          const confirmSubmitBtn = document.getElementById('confirmSubmitBtn');
+          const cancelBtn = summaryModal.querySelector('.cancel-button');
+          const closeBtn = summaryModal.querySelector('.close-button');
+          const statusDiv = document.getElementById('submission-status');
 
           // --- Sidebar Button Logic ---
           const loadRequestBtn = document.getElementById('loadRequestBtn');
