@@ -7,10 +7,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
-    <?!= include('stylesheet'); ?>
+    <style><?!= include('stylesheet'); ?></style>
 </head>
 <body>
     <div class="page-wrapper">
+        <!-- Sidebar Navigation -->
         <nav id="sidebar">
             <div class="sidebar-header">
                 <a href="?page=index">
@@ -25,6 +26,8 @@
                 <li><a href="?page=contact">Contact</a></li>
             </ul>
         </nav>
+
+        <!-- Main Content Area -->
         <div id="content">
             <header class="top-header">
                 <button id="menu-toggle" class="hamburger-btn">
@@ -34,14 +37,16 @@
                 </button>
                 <span class="header-title">Carndonagh Health Centre</span>
             </header>
+
             <main class="main-content-inner">
                 <?!= pageContent ?>
             </main>
+
             <footer class="main-footer">
                 <p>Carndonagh Health Centre | Derry Rd, Carndonagh, County Donegal | Tel: (074) 93 74208 / (074) 93 74262</p>
             </footer>
         </div>
     </div>
-    <?!= include('javascript'); ?>
+    <script><?!= include('javascript'); ?></script>
 </body>
 </html>
