@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carndonagh Health Centre</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <?!= include('stylesheet'); ?>
+</head>
+<body>
+    <div class="page-wrapper">
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <a href="?page=index">
+                    <img src="https://images.squarespace-cdn.com/content/v1/5f7f0586bc20b071daab8716/733e2f32-5f0e-499a-96dc-c12115a531f1/Carndonagh+Health+Centre-logo.jpg?format=1500w" alt="Carndonagh Health Centre Logo" class="logo">
+                    <h3>Carndonagh Health Centre</h3>
+                </a>
+            </div>
+            <ul class="nav-list">
+                <li><a href="?page=index">Home</a></li>
+                <li><a href="?page=services">Services</a></li>
+                <li><a href="?page=book-appointment">Book Appointment</a></li>
+                <li><a href="?page=contact">Contact</a></li>
+            </ul>
+        </nav>
+        <div id="content">
+            <header class="top-header">
+                <button id="menu-toggle" class="hamburger-btn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <span class="header-title">Carndonagh Health Centre</span>
+            </header>
+            <main class="main-content-inner">
+                <?!= pageContent ?>
+            </main>
+            <footer class="main-footer">
+                <p>Carndonagh Health Centre | Derry Rd, Carndonagh, County Donegal | Tel: (074) 93 74208 / (074) 93 74262</p>
+            </footer>
+        </div>
+    </div>
+    <?!= include('javascript'); ?>
+</body>
+</html>

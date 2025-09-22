@@ -1,0 +1,22 @@
+<div class="container">
+    <div class="card">
+        <h1>Secure Message Reply</h1>
+        <p class="sub-heading">Replying to message thread: <strong></strong></p>
+        <div id="reply-section">
+          <div class="form-group">
+            <label for="conversation-history">Conversation History</label>
+            <div id="conversation-history" class="history-box"></div>
+          </div>
+          <form id="replyForm">
+            <input type="hidden" name="formType" value="replyMessage">
+            <input type="hidden" name="messageId" value="">
+            <div class="form-group">
+              <label for="replyMessage">Your Reply</label>
+              <textarea id="replyMessage" name="replyMessage" required rows="5"></textarea>
+            </div>
+            <button type="submit" id="submitButton" class="btn">Send Reply</button>
+          </form>
+        </div>
+        <div id="submission-status"></div>
+    </div>
+</div>
