@@ -15,11 +15,11 @@ function doGet(e) {
   if (validPages.indexOf(page) !== -1) {
     contentFile = `content_${page}.html`;
   }
-  template.pageContent = HtmlService.createHtmlOutputFromFile(contentFile).getContent();
+  template.pageContent = HtmlService.createTemplateFromFile(contentFile).getRawContent();
   template.urlParams = e.parameter;
   return template.evaluate().setTitle("Carndonagh Health Centre").setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DEFAULT);
 }
-function include(filename) { return HtmlService.createHtmlOutputFromFile(filename).getContent(); }
+function include(filename) { return HtmlService.createTemplateFromFile(filename).getRawContent(); }
 function onOpen() {
   initializeColumnMap();
   const ui = SpreadsheetApp.getUi();
