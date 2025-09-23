@@ -167,7 +167,7 @@ function showMessageReplyDialog() {
   template.safePatientName = escapeHtml(patientName);
   template.safeMessageId = escapeHtml(messageId);
   template.safeHistory = escapeHtml(fullHistory);
-  template.messageId = messageId;
+  template.messageId = messageId; 
   const htmlOutput = template.evaluate().setWidth(600).setHeight(450);
   ui.showModalDialog(htmlOutput, `Replying to ${patientName}`);
 }

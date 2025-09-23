@@ -96,7 +96,7 @@ function initializeForms() {
 }
 function initializeReplyPage() {
     if (document.getElementById('reply-section')) {
-        const messageId = "<?!= urlParams.id ?>";
+        const messageId = SCRIPT_URL_PARAMS.id;
         const historyDiv = document.getElementById('conversation-history');
         const statusDiv = document.getElementById('submission-status');
         const messageIdStrongEl = document.querySelector('.sub-heading strong');
