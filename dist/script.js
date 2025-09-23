@@ -58,20 +58,18 @@ async function postData(url = '', data = {}) {
 
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', function() {
-    // Load partials first, then initialize everything that might depend on them.
+
+    // --- INITIALIZE CORE FORM & PAGE LOGIC (Does not depend on partials) ---
+    initializeForms();
+    initializeReplyPage();
+
+    // --- INITIALIZE PARTIALS & DEPENDENT LOGIC ---
     includeHTML().then(() => {
-        initializeForms();
-        initializeReplyPage();
+        // This code runs *after* partials are loaded
         initializeNavigation();
     }).catch(error => {
         console.error("Error loading partial HTML components:", error);
-        // Display a user-friendly error message on the page, as it's a critical failure.
-        const statusDiv = document.getElementById('submission-status');
-        if(statusDiv) {
-            statusDiv.className = 'error';
-            statusDiv.innerHTML = '<strong>Error:</strong> A critical part of the page could not be loaded. Please check your internet connection and try again.';
-            statusDiv.style.display = 'block';
-        }
+        // You could optionally display a message to the user on the page
     });
 });
 

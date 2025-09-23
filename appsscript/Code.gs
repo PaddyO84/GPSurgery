@@ -557,8 +557,11 @@ function reportError(functionName, error, context = {}) {
  * @returns {GoogleAppsScript.Content.TextOutput} A TextOutput object.
  */
 function createJsonResponse(payload) {
-  return ContentService.createTextOutput(JSON.stringify(payload))
+  const response = ContentService.createTextOutput(JSON.stringify(payload))
     .setMimeType(ContentService.MimeType.JSON);
+  // Explicitly set the CORS header on all JSON responses
+  response.addHttpHeader("Access-Control-Allow-Origin", "*");
+  return response;
 }
 
 function escapeHtml(unsafe) {
